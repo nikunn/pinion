@@ -1,7 +1,7 @@
 #!/usr/bin/lua
 
 -- Definiton of data acquisition device
-local daq_device = "RPI"
+local daq_device = "UXB"
 
 ----------------------------------- Universe -----------------------------------
 -- List of all object to be created, in this order
@@ -47,10 +47,10 @@ Catalog =
     class = "LabJack",
   },
 
-  RPI =
+  UXB =
   {
-    name = "RPI",
-    class = "RaspberryPi",
+    name = "UXB",
+    class = "LinuxBoard",
   },
 
     ---------------------------------- Wire --------------------------------
@@ -59,7 +59,7 @@ Catalog =
     name = "UartWire",
     class = "UartWire",
     daq = daq_device,
-    device = "/dev/ttyAMA0",
+    device = "/dev/ttyO1",
     com_type = "asynch", -- serial or asynch
     default_baud = 9600,
     transmit_line = 1,

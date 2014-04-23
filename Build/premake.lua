@@ -6,25 +6,22 @@ newoption {
   allowed =
   {
     { "lab",  "LabJack" },
-    { "rpi",  "RaspberryPi" },
-    { "bbb",  "BeagleBone Black" }
+    { "uxb",  "LinuxBoard" },
   }
 }
 
 -- Define device compilation flag for all devices
 local device_def = {}
 device_def["lab"] = "__DEVICE_LAB__"
-device_def["rpi"] = "__DEVICE_RPI__"
-device_def["bbb"] = "__DEVICE_BBB__"
+device_def["uxb"] = "__DEVICE_UXB__"
 
 local device_lib = {}
 device_lib["lab"] = "LabJackM"
-device_lib["rpi"] = nil
-device_lib["bbb"] = nil
+device_lib["uxb"] = nil
 
 -- Set default device to LabJack
 if not _OPTIONS["device"] then
-  _OPTIONS["device"] = "rpi"
+  _OPTIONS["device"] = "uxb"
 end
 
 -- Get the data acquisition device
@@ -37,7 +34,7 @@ solution "daq"
   -- All code is in C++
   language "C++"
   -- All code is to be compiled in c++11
-  buildoptions "-std=c++11"
+  buildoptions "-std=c++0x"
 
   configuration "Release"
     defines { "NDEBUG" }

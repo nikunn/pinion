@@ -1,5 +1,5 @@
-#ifndef _RASPBERRYPI_DAQ_H
-#define _RASPBERRYPI_DAQ_H
+#ifndef _LINUXBOARD_DAQ_H
+#define _LINUXBOARD_DAQ_H
 
 #include "Acquisition/Daq.h"
 
@@ -13,13 +13,13 @@ class UartSensor;
 class UartPacket;
 
 
-//================================ RaspberryPiDaq =================================
-class RaspberryPiDaq : public DaqDevice
+//=============================== LinuxBoardDaq ================================
+class LinuxBoardDaq : public DaqDevice
 {
 public :  //======================== Public ======================
 
-  RaspberryPiDaq(const LuaTable&);
-  ~RaspberryPiDaq();
+  LinuxBoardDaq(const LuaTable&);
+  ~LinuxBoardDaq();
 
           //======================== Device ======================
   void deviceOpen();
