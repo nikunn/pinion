@@ -62,9 +62,9 @@ class Adafruit_L3GD20 : public I2cSensor
 public:
 
   //============================ public functions ============================
-  Adafruit_L3GD20(int handle, int data_line, int clock_line, byte addr = L3GD20_I2CADDR);
+  Adafruit_L3GD20(const LuaTable&);
 
-  bool init(L3GD20_RANGE range = L3GD20_RANGE_250DPS);
+  bool init();
   float sensitivity(L3GD20_RANGE range);
   void get();
 

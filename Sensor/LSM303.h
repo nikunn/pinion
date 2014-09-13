@@ -50,7 +50,7 @@ class Adafruit_LSM303 : public I2cSensor
 public:
 
   //============================ public functions ============================
-  Adafruit_LSM303(int hdl, int sda, int sdl, AXIS axis = AXIS_Z, byte addr = LSM303_I2CADDR);
+  Adafruit_LSM303(const LuaTable&);
   bool init();
   void get();
 

@@ -1,17 +1,31 @@
 #include<cmath>
-#include "TMP006.h"
 
-Adafruit_TMP006::Adafruit_TMP006(int handle, int data_line, int clock_line, byte address)
+#include "Framework/Logger.h"
+#include "Framework/Factory.h"
+#include "Acquisition/Daq.h"
+#include "Acquisition/Wire.h"
+#include "Sensor/TMP006.h"
+
+Adafruit_TMP006::Adafruit_TMP006(const LuaTable& cfg)
 {
-  _handle = handle;
-  _address = address;
-  _data_line = data_line;
-  _clock_line = clock_line;
+  // Set the sensor I2C address
+  _address = TMP006_I2CADDR;
+
+  // Set Data Acquisition device
+  std::string daq_name = cfg.get<std::string>("device");
+  _daq = static_cast<DaqDevice*>(Factory::get(daq_name));
+
+  // Set Wire
+  std::string wire_name = cfg.get<std::string>("wire");
+  _wire = static_cast<I2cWire*>(Factory::get(wire_name));
 }
 
 
-bool Adafruit_TMP006::init(uint16_t samplerate)
+bool Adafruit_TMP006::init()
 {
+  // Define the smaple rate
+  uint16_t samplerate = TMP006_CONFIG_16SAMPLE;
+
   // Define a configuration
   // 0111 1001 1000 0000
   uint16_t config = TMP006_CONFIG_MODEON | TMP006_CONFIG_DRDYEN | samplerate;
@@ -23,7 +37,7 @@ bool Adafruit_TMP006::init(uint16_t samplerate)
   byte check[2];
   read(TMP006_REGISTER_CONFIG, &check[0], 2);
 
-  printf("config:%u check:%u\n", config, int8To16(&check[0]));
+  INFO_PF("config:%u check:%u\n", config, int8To16(&check[0]));
 
   // Perform check on the config
   if (int8To16(&check[0]) != config) { return false; }
@@ -55,9 +69,7 @@ void Adafruit_TMP006::get()
   _ambiant = readDieTempC();
 
   // Some log if debug
-  #ifdef _DEBUG_SENSOR_
-  printf("obj:%f amb:%f\n", _data, _ambiant);
-  #endif
+  INFO_PF("TMP006 obj:%f amb:%f\n", _data, _ambiant);
 }
 
 float Adafruit_TMP006::readDieTempC(void)

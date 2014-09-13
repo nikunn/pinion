@@ -66,7 +66,7 @@ public :
   Sensor() {};
   ~Sensor() {};
 
-  const DaqDevice* daqDevice() const { return _daq; }
+  DaqDevice& daq() const { return *_daq; }
 
 protected :
 
@@ -86,6 +86,10 @@ public :
   //============================ public functions ============================
   const I2cWire* wire() const { return _wire; }
   byte address() const { return _address; }
+
+  void set();
+  void read(const byte regis, byte* data, const int bytes_num = 1);
+  void write(const byte regis, byte* data, const int bytes_num = 1);
 
 protected :
 
@@ -115,7 +119,7 @@ public :
 
           //======================= Accessor =====================
   long baud() const { return _baud; }
-  void setBaud(const CommandPacket& cmd, uint32_t baud);
+  void setBaud(const CommandPacket& cmd, const uint32_t baud);
 
   const AsynchWire* wire() const { return _wire; }
 
@@ -124,6 +128,7 @@ public :
   void stop();
 
   void read();
+  void write(const CommandPacket&);
 
   void startPacket();
   void endPacket();

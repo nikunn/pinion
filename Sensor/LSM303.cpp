@@ -1,13 +1,42 @@
-#include "LSM303.h"
+#include "Framework/LuaBind.h"
+#include "Framework/Logger.h"
+#include "Framework/Factory.h"
+#include "Acquisition/Daq.h"
+#include "Acquisition/Wire.h"
+#include "Sensor/LSM303.h"
 
 // Instantiates a new Adafruit_LSM303 class
-Adafruit_LSM303::Adafruit_LSM303(int handle, int data_line, int clock_line, AXIS axis, byte address)
+Adafruit_LSM303::Adafruit_LSM303(const LuaTable& cfg)
 {
-  _axis = axis;
-  _handle = handle;
-  _address = address;
-  _data_line = data_line;
-  _clock_line = clock_line;
+  // Set the sensor I2C address
+  _address = LSM303_I2CADDR;
+
+  // Set Data Acquisition device
+  std::string daq_name = cfg.get<std::string>("device");
+  _daq = static_cast<DaqDevice*>(Factory::get(daq_name));
+
+  // Set Wire
+  std::string wire_name = cfg.get<std::string>("wire");
+  _wire = static_cast<I2cWire*>(Factory::get(wire_name));
+
+  // Get the gravity axis as a string from the config
+  std::string axis_str = cfg.get<std::string>("gravity_axis");
+
+  // Get the axis as a char, for switch statement
+  char axis = axis_str.c_str()[0];
+
+  // Set the sensor gravity axis
+  switch(axis)
+  {
+    case 'X':
+      _axis = AXIS_X; break;
+    case 'Y':
+      _axis = AXIS_Y; break;
+    case 'Z':
+      _axis = AXIS_Z; break;
+    default:
+      FATAL_LG("LSM303 Cannot parse the gravity axis (X/Y/Z)");
+  }
 }
 
 // Initialize Accelerometer
@@ -23,7 +52,7 @@ bool Adafruit_LSM303::init()
   read(LSM303_REGISTER_CTRL_REG1_A, &reg1);
 
   // Check it has the correct value
-  if (reg1 != config) { return false; }  
+  if (reg1 != config) { ERROR_LG("LSM303 cannot write/read register 1"); return false; }  
   
   // Set the min max and the high resolution mode
   // 0x8 = 0(Block Data) 0(Endian) 00(2G MinMax) 1(HighResolution) 00(Nothing) 0(SPI) 
@@ -35,7 +64,7 @@ bool Adafruit_LSM303::init()
   read(LSM303_REGISTER_CTRL_REG4_A, &reg4);
 
   // Check it is what we expect
-  if (reg4 != config) { return false; }
+  if (reg4 != config) { ERROR_LG("LSM303 cannot write/read register 4"); return false; }
 
   // Initialization went fine
   return true;
@@ -69,7 +98,5 @@ void Adafruit_LSM303::get()
   _data.z = _data.z / 1000 - (_axis == AXIS_Z ? 1 : 0);
 
   // Some log if debug
-  #ifdef _DEBUG_SENSOR_
-  printf("LSM303 x:%f y:%f z:%f\n", _data.x, _data.y, _data.z);
-  #endif
+  INFO_PF("LSM303 x:%f y:%f z:%f", _data.x, _data.y, _data.z);
 }

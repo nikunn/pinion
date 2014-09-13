@@ -1,16 +1,38 @@
 #include "MAG303.h"
 
 // Instantiates a new Adafruit_MAG303 class
-Adafruit_MAG303::Adafruit_MAG303(int handle, int data_line, int clock_line, byte address)
+Adafruit_MAG303::Adafruit_MAG303(const LuaTable& cfg)
 {
-  _handle = handle;
-  _address = address;
-  _data_line = data_line;
-  _clock_line = clock_line;
+  // Set the sensor I2C address
+  _address = MAG303_I2CADDR;
+
+  // Set Data Acquisition device
+  std::string daq_name = cfg.get<std::string>("device");
+  _daq = static_cast<DaqDevice*>(Factory::get(daq_name));
+
+  // Set Wire
+  std::string wire_name = cfg.get<std::string>("wire");
+  _wire = static_cast<I2cWire*>(Factory::get(wire_name));
+
+  // Get the sensor gain
+  float gain = cfg.get<float>("gain");
+
+  // Set the sensor gravity axis
+  if (gain == 1.3f) { _gain = MAG303_GAIN_1_3; }
+  else if (gain == 1.9f) { _gain = MAG303_GAIN_1_9; }
+  else if (gain == 2.5f) { _gain = MAG303_GAIN_2_5; }
+  else if (gain == 4.0f) { _gain = MAG303_GAIN_4_0; }
+  else if (gain == 4.7f) { _gain = MAG303_GAIN_4_7; }
+  else if (gain == 5.6f) { _gain = MAG303_GAIN_5_6; }
+  else if (gain == 8.1f) { _gain = MAG303_GAIN_8_1; }
+  else
+  {
+    FATAL_PF("MAG303 Cannot parse the gain:%f (1.3/1.9/2.5/4.0/4.7/5.6/8.1)", gain);
+  }
 }
 
 // Initialize the magnetometer
-bool Adafruit_MAG303::init(MAG303_GAIN gain)
+bool Adafruit_MAG303::init()
 {
   // Enable the magnetometer
   byte config = 0x0;
@@ -22,33 +44,30 @@ bool Adafruit_MAG303::init(MAG303_GAIN gain)
   read(MAG303_REGISTER_CRA_REG_M, &reg1);
 
   // Check it is what we expect
-  if (reg1 != 0x10) { return false; }
+  if (reg1 != 0x10) { ERROR_LG("MAG303 cannot write/read register 1"); return false; }
   
   // Set the gain to a known level
-  if (!setGain(gain)) { return false; };
+  if (!setGain()) { ERROR_LG("MAG303 cannot set the gain"); return false; };
 
   // Initialization went fine
   return true;
 }
 
 // Sets the magnetometer's gain
-bool Adafruit_MAG303::setGain(MAG303_GAIN gain)
+bool Adafruit_MAG303::setGain()
 {
   // Write the desired gain to the sensor
-  write(MAG303_REGISTER_CRB_REG_M, (byte*)&gain);
+  write(MAG303_REGISTER_CRB_REG_M, (byte*)&_gain);
   
   // Read the data we have just written
   byte regm;
   read(MAG303_REGISTER_CRB_REG_M, &regm);
 
   // Check it is what we expect
-  if (regm != gain) { return false; }
+  if (regm != _gain) { return false; }
   
-  // Set the private member to gain value
-  _gain = gain;
- 
   // Set the constant
-  switch(gain)
+  switch(_gain)
   {
     case MAG303_GAIN_1_3 :
       _gauss_lsb_xy = 1100;
@@ -109,7 +128,5 @@ void Adafruit_MAG303::get()
   _data.z *=  GAUSS_TO_MICROTESLA / _gauss_lsb_z;
 
   // Some log if debug
-  #ifdef _DEBUG_SENSOR_
-  printf("MAG303 x:%f y:%f z:%f\n", _data.x, _data.y, _data.z);
-  #endif
+  INFO_PF("MAG303 x:%f y:%f z:%f", _data.x, _data.y, _data.z);
 }

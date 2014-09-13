@@ -1,5 +1,5 @@
 #include "Framework/Logger.h"
-
+#include "Acquisition/Daq.h"
 #include "Sensor/Sensor.h"
 
 //==================================== Sensor ==================================
@@ -16,23 +16,44 @@
   return ((int16_t)hi << 8) | lo;
 }
 
+//=================================== I2cSensor ================================
+// Set the acquisition device to communicate with this sensor
+void I2cSensor::set()
+{
+  daq().i2cSet(*this);
+}
+
+// Read sensor data from acquisition device
+void I2cSensor::read(const byte regis, byte* data, const int bytes_num)
+{
+  daq().i2cRead(*this, regis, data, bytes_num);
+}
+
+// Write data to sensor
+void I2cSensor::write(const byte regis, byte* data, const int bytes_num)
+{
+  daq().i2cWrite(*this, regis, data, bytes_num);
+}
 
 //================================== AsynchSensor ==============================
 
 // Set Baud rate
-void AsynchSensor::setBaud(const CommandPacket& cmd, uint32_t baud_rate)
+void AsynchSensor::setBaud(const CommandPacket& cmd, const uint32_t baud_rate)
 {
   // Send the command to change the baud to the sensor
-  _daq->asynchWrite(cmd);
+  daq().asynchWrite(cmd);
 
   // Stop the communication
-  _daq->asynchStop();
+  daq().asynchStop();
 
   // Change the baud
   _baud = baud_rate;
 
+  // Set the asynch communication parameters
+  daq().asynchSet(*this);
+
   // Start the communication
-  _daq->asynchStart();
+  daq().asynchStart();
 }
 
 // Start the Asynchronous communication
@@ -48,17 +69,17 @@ void AsynchSensor::start()
   _packet_id = 0;
 
   // Set the Asynch communication for this sensor
-  _daq->asynchSet(*this);
+  daq().asynchSet(*this);
 
   // Start the communication
-  _daq->asynchStart();
+  daq().asynchStart();
 }
 
 // Stop the Asynchronous communication
 void AsynchSensor::stop()
 {
   // Stop the communication
-  _daq->asynchStop();
+  daq().asynchStop();
 }
 
 // Start a new packet
@@ -97,7 +118,7 @@ void AsynchSensor::read()
   int byte_read = 0;
 
   // Read the buffer from the device
-  _daq->asynchRead(&data[0], byte_read);
+  daq().asynchRead(&data[0], byte_read);
 
   // Go through the read data
   for (int i = 0; i < byte_read; i++)
@@ -136,3 +157,13 @@ void AsynchSensor::read()
     }
   }
 }
+
+// Write a command to sensor
+void AsynchSensor::write(const CommandPacket& cmd)
+{
+  daq().asynchWrite(cmd);
+}
+
+
+
+

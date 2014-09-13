@@ -20,6 +20,9 @@ Universe =
   {
     -- Asynch wire connecting GPS
     "AsynchWire",
+
+    -- I2C wire connecting sensors
+    "I2cWire",
   },
 
   -- List of sensors plugged to data acquisition devices
@@ -28,13 +31,13 @@ Universe =
     "GPS",
 
     -- Accelerometer
-    --"Accel",
+    "Accel",
 
     -- Gyroscope
-    --"Gyro",
+    "Gyro",
 
     -- Magnetometer
-    --"Magneto",
+    "Magneto",
   },
 }
 
@@ -57,14 +60,50 @@ Catalog =
     receive_line = 0,
   },
 
+  I2cWire = 
+  {
+    name="I2cWire",
+    class="I2cWire",
+    data_line = 2,
+    clock_line = 3,
+  },
+
     -------------------------------- Sensors -------------------------------
   GPS =
   {
     device = "LBJ",
     name="GPS",
     class="GPS",
-    wire = "AsynchWire",
+    wire="AsynchWire",
     start_baud=9600,
+    rate=10, -- in Hz, (1/5/10)
+  },
+
+  Accel =
+  {
+    device = "LBJ",
+    name="Accel",
+    class="LSM303",
+    wire="I2cWire",
+    gravity_axis="Z",
+  },
+
+  Magneto =
+  {
+    device = "LBJ",
+    name="Magneto",
+    class="MAG303",
+    wire="I2cWire",
+    gain=1.3, -- in something, (1.3/1.9/2.5/4.0/4.7/5.6/8.1)
+  },
+
+  Gyro =
+  {
+    device = "LBJ",
+    name="Gyro",
+    class="L3GD20",
+    wire="I2cWire",
+    range=250, -- in degree per second, (250/500/2000)
   },
 }
 

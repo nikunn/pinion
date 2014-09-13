@@ -39,9 +39,6 @@ public :
 private:
 
   //=========================== private members ============================
-
-  void asynchBaud(uint32_t baud_rate);
-
   // Current I2C configuration
   const I2cWire* _i2c_wire;
 };

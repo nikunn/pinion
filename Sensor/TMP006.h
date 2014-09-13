@@ -49,9 +49,9 @@ class Adafruit_TMP006 : public I2cSensor
 public:
 
   //============================ public functions ============================
-  Adafruit_TMP006(int handle, int data_line, int clock_line, byte addr = TMP006_I2CADDR);
+  Adafruit_TMP006(const LuaTable&);
 
-  bool init(uint16_t samplerate = TMP006_CONFIG_16SAMPLE);
+  bool init();
   void get();
 
 private:

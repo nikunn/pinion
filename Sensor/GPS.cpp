@@ -1,8 +1,9 @@
-#include "Sensor/GPS.h"
-#include "Sensor/Sensor.cpp" // SALE
-
 #include "Framework/LuaBind.h"
+#include "Framework/Logger.h"
 #include "Framework/Factory.h"
+#include "Acquisition/Daq.h"
+#include "Acquisition/Wire.h"
+#include "Sensor/GPS.h"
 
 //================================== Adafruit_GPS ==============================
 // Constructor
@@ -18,6 +19,15 @@ Adafruit_GPS::Adafruit_GPS(const LuaTable& cfg)
   // Set Wire
   std::string wire_name = cfg.get<std::string>("wire");
   _wire = static_cast<AsynchWire*>(Factory::get(wire_name));
+
+  // Get rate
+  _rate = cfg.get<int>("rate");
+
+  // Check that the rate value is known
+  if (_rate != 1 && _rate != 5 && _rate != 10)
+  {
+    FATAL_PF("GPS Cannot parse the rate:%u (1/5/10)", _rate);
+  }
 
   // Number of packet before non ack
   _max_packet_wait = 10;
@@ -40,21 +50,24 @@ bool Adafruit_GPS::init()
   cmd = CommandPacket(GPS_PMTK_OUTPUT_RMC, 314);
   command(cmd);
 
-  // Change the output rate to 10HZ
-  cmd = CommandPacket(GPS_PMTK_UPDATE_10HZ, 220);
+  // Change the output rate
+  switch (_rate)
+  {
+    case 1:
+      cmd = CommandPacket(GPS_PMTK_UPDATE_1HZ, 220); break;
+    case 5:
+      cmd = CommandPacket(GPS_PMTK_UPDATE_5HZ, 220); break;
+    case 10:
+      cmd = CommandPacket(GPS_PMTK_UPDATE_10HZ, 220); break;
+    default:
+      ERROR_LG("GPS rate is unknown");
+  }
+
+  // Send the command to change the output rate
   command(cmd);
 
   // Initialization went fine
   return true;
-}
-
-void Adafruit_GPS::setBaud(const CommandPacket& cmd, uint32_t baud)
-{
-  // Send the command to change the sensor baud rate
-  command(cmd);
-
-  // Update the sensor baud rate value
-  _baud = baud;
 }
 
 void Adafruit_GPS::command(const CommandPacket& cmd)
@@ -63,7 +76,7 @@ void Adafruit_GPS::command(const CommandPacket& cmd)
   _command_pending.push_back(std::make_pair(cmd, packetId()));
 
   // Send the command to the sensor
-  _daq->asynchWrite(cmd);
+  write(cmd);
 
   // Call the get function as we may received the ack quickly
   get();
@@ -71,10 +84,8 @@ void Adafruit_GPS::command(const CommandPacket& cmd)
 
 void Adafruit_GPS::onPacket(const std::string& packet)
 {
-  #ifdef _DEBUG_SENSOR_
   // Log the received packet
-  printf("%s\n", packet.c_str());
-  #endif
+  INFO_PF("%s", packet.c_str());
 
   // Check if this is a ack and call onAck
   if (packet.rfind(std::string("PMTK001")) != std::string::npos && packet.length() == GPS_ACK_LEN)
@@ -141,7 +152,7 @@ void Adafruit_GPS::onAck(const std::string& packet)
 // Called when no ack were received after a command
 void Adafruit_GPS::onNonAck(const CommandPacket& cmd)
 {
-  printf("non ack %u\n", cmd.id); 
+  WARNING_PF("Command non ack %u", cmd.id); 
 }
 
 // Get data from the sensor and process it

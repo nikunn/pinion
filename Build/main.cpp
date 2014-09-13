@@ -1,28 +1,28 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "Acquisition/Daq.h"
-#include "Acquisition/LabJackDaq.cpp"
-
-#include "Sensor/Sensor.h"
-//#include "Sensor/TMP006.h"
-//#include "Sensor/LSM303.h"
-//#include "Sensor/MAG303.h"
-//#include "Sensor/L3GD20.h"
-#include "Sensor/GPS.cpp"
-
 #include "Framework/LuaBind.h"
 #include "Framework/Logger.h"
 #include "Framework/Factory.h"
 #include "Framework/Universe.h"
 
+#include "Acquisition/Daq.h"
+#include "Acquisition/LabJackDaq.cpp"
+
+#include "Sensor/All.h"
+
 
 //=================================== Main =====================================
 int main()
 {
-  // Register all the classes
+  // Register all the classes in the factory
   Factory::registerClass("LabJack", new CreatorType<LabJackDaq>);
+  Factory::registerClass("AsynchWire", new CreatorType<AsynchWire>);
+  Factory::registerClass("I2cWire", new CreatorType<I2cWire>);
   Factory::registerClass("GPS", new CreatorType<Adafruit_GPS>);
+  Factory::registerClass("LSM303", new CreatorType<Adafruit_LSM303>);
+  Factory::registerClass("MAG303", new CreatorType<Adafruit_MAG303>);
+  Factory::registerClass("L3GD20", new CreatorType<Adafruit_L3GD20>);
 
   // Read the configuration file
   LuaScript script("config.lua");
@@ -40,24 +40,47 @@ int main()
   Universe::createUniverse(lua_state);
 
 
+
+
+
   LabJackDaq* labd = static_cast<LabJackDaq*>(Factory::get("LBJ"));
 
   Adafruit_GPS* gps = static_cast<Adafruit_GPS*>(Factory::get("GPS"));
+  Adafruit_LSM303* accel = static_cast<Adafruit_LSM303*>(Factory::get("Accel"));
+  Adafruit_MAG303* magneto = static_cast<Adafruit_MAG303*>(Factory::get("Magneto"));
+  Adafruit_L3GD20* gyro = static_cast<Adafruit_L3GD20*>(Factory::get("Gyro"));
+
+  labd->open();
+
+
+  if (gyro->init()) { INFO_LG("Gyro init ok"); }
+  else { INFO_LG("Gyro init failed"); }
+
+  if (accel->init()) { INFO_LG("Accel init ok"); }
+  else { INFO_LG("Accel init failed"); }
+
+  if (magneto->init()) { INFO_LG("Magneto init ok"); }
+  else { INFO_LG("Magneto init failed"); }
 
   /*
-  labd->open();
+  while (true)
+  {
+    gyro->get();
+    usleep(100000);
+    accel->get();
+    usleep(100000);
+    magneto->get();
+    usleep(100000);
+  }
+  */
 
   gps->stop();
   gps->start();
-  gps->init();
-
-  long counter = 0;
+  if (gps->init()) { INFO_LG("GPS init ok"); }
 
   while (true)
   {
     gps->get();
     usleep(1000);
-    counter++;
   }
-  */
 }

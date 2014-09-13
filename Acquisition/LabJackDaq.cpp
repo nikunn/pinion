@@ -1,9 +1,8 @@
 #include "LJM_Utilities.h"
 #include "LabJackM.h"
 
-#include "Acquisition/LabJackDaq.h"
-
 #include "Framework/Logger.h"
+#include "Acquisition/LabJackDaq.h"
 #include "Acquisition/Wire.cpp"
 #include "Sensor/Sensor.h"
 
@@ -85,17 +84,25 @@ void LabJackDaq::i2cSet(const I2cSensor& sensor)
   // Check if we need to set the I2C configuration for this wire
   if (_i2c_wire != wire)
   {
+    // Get the I2C wire line
+    int data_line = wire->dataLine();
+    int clock_line = wire->clockLine();
+
     // Configure the I2C data line, SDA pin number
-    err = LJM_eWriteName(handle(), "I2C_SDA_DIONUM", wire->dataLine());
+    err = LJM_eWriteName(handle(), "I2C_SDA_DIONUM", data_line);
     ErrorCheck(err, "LJM_eWriteName (I2C_SDA_DIONUM)");
 
     // Configure the I2C clock line, SCL pin number
-    err = LJM_eWriteName(handle(), "I2C_SCL_DIONUM", wire->clockLine());
+    err = LJM_eWriteName(handle(), "I2C_SCL_DIONUM", clock_line);
     ErrorCheck(err, "LJM_eWriteName (I2C_SCL_DIONUM)");
 
     // Speed throttle is inversely proportional to clock frequency. 0 = max
     err = LJM_eWriteName(handle(), "I2C_SPEED_THROTTLE", 0);
     ErrorCheck(err, "LJM_eWriteName (I2C_SPEED_THROTTLE)");
+
+    // A bit of log
+    INFO_PF("Setting LabJack:%u I2C with data:%u clock:%u",
+      handle(), data_line, clock_line);
   }
 
   // Options bits:
@@ -202,17 +209,6 @@ void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, byte* data,
 
 //============================== Asynch Communication ==========================
 
-// Set the baud rate
-void LabJackDaq::asynchBaud(uint32_t baud_rate)
-{
-  // Define some variable
-  int err;
-
-  // Configure the baud rate
-  err = LJM_eWriteName(handle(), "ASYNCH_BAUD", baud_rate);
-  ErrorCheck(err, "LJM_eWriteName (ASYNCH_BAUD)");
-}
-
 // Initialize the Asynch communication for this sensor
 void LabJackDaq::asynchSet(const AsynchSensor& sensor)
 {
@@ -238,8 +234,9 @@ void LabJackDaq::asynchSet(const AsynchSensor& sensor)
   err = LJM_eWriteName(handle(), "ASYNCH_RX_BUFFER_SIZE_BYTES", ASYNCH_BUFFER_SIZE);
   ErrorCheck(err, "LJM_eWriteName (ASYNCH_RX_BUFFER_SIZE_BYTES)");
 
-  // Set the baud rate
-  asynchBaud(sensor.baud());
+  // Configure the baud rate
+  err = LJM_eWriteName(handle(), "ASYNCH_BAUD", sensor.baud());
+  ErrorCheck(err, "LJM_eWriteName (ASYNCH_BAUD)");
 }
 
 // Turn on Asynch. Configures timing hardware, DIO lines and allocates the receiving buffer

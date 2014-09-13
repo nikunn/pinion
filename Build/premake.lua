@@ -36,11 +36,20 @@ project "framework"
   targetdir "lib/"
 
 
+----------------------------------- Framework ----------------------------------
+project "sensor"
+  kind "SharedLib"
+  links { "external" }
+  files { "../Sensor/All.cpp" }
+  includedirs { "../", "/usr/include/lua5.2/", "../Include/Sol/" }
+  targetdir "lib/"
+
+
 ---------------------------------- Acquisition ---------------------------------
 project "daq"
   kind "ConsoleApp"
   files { "main.cpp" }
-  links { "external", "framework", "LabJackM" }
+  links { "external", "framework", "sensor", "LabJackM" }
   includedirs { "../", "/usr/include/lua5.2/", "../Include/Sol/" }
   linkoptions { "-Wl,-rpath,./lib/" }
 

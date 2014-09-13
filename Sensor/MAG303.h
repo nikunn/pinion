@@ -50,10 +50,10 @@ class Adafruit_MAG303 : public I2cSensor
 public:
 
   //============================ public functions ============================
-  Adafruit_MAG303(int handle, int data_line, int clock_line, byte addr = MAG303_I2CADDR);
+  Adafruit_MAG303(const LuaTable&);
 
-  bool init(MAG303_GAIN gain = MAG303_GAIN_1_3);
-  bool setGain(MAG303_GAIN gain);
+  bool init();
+  bool setGain();
   void get();
 
 private:

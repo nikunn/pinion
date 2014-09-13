@@ -42,13 +42,13 @@ public:
   void onAck(const std::string& packet);
   void onNonAck(const CommandPacket& cmd);
 
-  void setBaud(const CommandPacket&, uint32_t baud);
-
 private:
 
   //=========================== private members ============================
   int _max_packet_wait;
   std::vector<std::pair<CommandPacket, long> > _command_pending;
+
+  int _rate;
 };
 
 #endif

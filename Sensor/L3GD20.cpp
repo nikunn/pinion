@@ -1,26 +1,51 @@
-#include "L3GD20.h"
+#include "Framework/LuaBind.h"
+#include "Framework/Logger.h"
+#include "Framework/Factory.h"
+#include "Acquisition/Daq.h"
+#include "Acquisition/Wire.h"
+#include "Sensor/L3GD20.h"
 
+//================================ Adafruit_L3GD20 =============================
 // Instantiates a new Adafruit_L3GD20 class
-Adafruit_L3GD20::Adafruit_L3GD20(int handle, int data_line, int clock_line, byte address)
+Adafruit_L3GD20::Adafruit_L3GD20(const LuaTable& cfg)
 {
-  _handle = handle;
-  _address = address;
-  _data_line = data_line;
-  _clock_line = clock_line;
+  // Set the sensor I2C address
+  _address = L3GD20_I2CADDR;
+
+  // Set Data Acquisition device
+  std::string daq_name = cfg.get<std::string>("device");
+  _daq = static_cast<DaqDevice*>(Factory::get(daq_name));
+
+  // Set Wire
+  std::string wire_name = cfg.get<std::string>("wire");
+  _wire = static_cast<I2cWire*>(Factory::get(wire_name));
+
+  // Get the sensor range
+  int range = cfg.get<int>("range");
+
+  // Set the sensor gravity axis
+  switch(range)
+  {
+    case 250:
+      _range = L3GD20_RANGE_250DPS; break;
+    case 500:
+      _range = L3GD20_RANGE_500DPS; break;
+    case 2000:
+      _range = L3GD20_RANGE_2000DPS; break;
+    default:
+      FATAL_PF("L3GD20 Cannot parse the range:%u (250/500/2000)", range);
+  }
 }
 
 // Initialize
-bool Adafruit_L3GD20::init(L3GD20_RANGE range)
+bool Adafruit_L3GD20::init()
 {
-  // Set the range
-  _range = range;
-
   // Check we are properly connected by comparing the WHOAMI
   byte whoami;
   read(L3GD20_REGISTER_WHO_AM_I, &whoami);
 
   // Check WHOAMI value
-  if (whoami != L3GD20_ID) { return false; }
+  if (whoami != L3GD20_ID) { ERROR_LG("L3GD20 wrong whoami"); return false; }
 
   // Enable all 3 channels
   byte config = 0x0F;
@@ -31,7 +56,7 @@ bool Adafruit_L3GD20::init(L3GD20_RANGE range)
   read(L3GD20_REGISTER_CTRL_REG1, &reg1);
 
   // Check it is what we expect
-  if (reg1 != config) { return false; }
+  if (reg1 != config) { ERROR_LG("L3GD20 cannot write/read register 1"); return false; }
 
   // Change the resolution
   switch(_range)
@@ -55,7 +80,7 @@ bool Adafruit_L3GD20::init(L3GD20_RANGE range)
   read(L3GD20_REGISTER_CTRL_REG4, &reg4);
 
   // Check it is what we expect
-  if (reg4 != config) { return false; }
+  if (reg4 != config) { ERROR_LG("L3GD20 cannot write/read register 4"); return false; }
 
   // Initialization went fine
   return true;
@@ -100,8 +125,6 @@ void Adafruit_L3GD20::get()
   _data.y = factor * int8To16(yhi, ylo);
   _data.z = factor * int8To16(zhi, zlo);
 
-  // Some log if debug
-  #ifdef _DEBUG_SENSOR_
-  printf("L3GD20 x:%f y:%f z:%f\n", _data.x, _data.y, _data.z);
-  #endif
+  // Some log
+  INFO_PF("L3GD20 x:%f y:%f z:%f", _data.x, _data.y, _data.z);
 }
