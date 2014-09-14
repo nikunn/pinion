@@ -85,12 +85,22 @@ void Adafruit_GPS::command(const CommandPacket& cmd)
 void Adafruit_GPS::onPacket(const std::string& packet)
 {
   // Log the received packet
-  INFO_PF("%s", packet.c_str());
+  //INFO_PF("%s", packet.c_str());
 
   // Check if this is a ack and call onAck
   if (packet.rfind(std::string("PMTK001")) != std::string::npos && packet.length() == GPS_ACK_LEN)
   {
     onAck(packet);
+  }
+  // Then this is a packet containing GPS info
+  else
+  {
+    // Parse the new packet
+    _gps_parser.parse(packet, _gps_info);
+
+    INFO_PF("GPS position signal:%u latitude:%f longitude:%f speed:%f direction:%f",
+      _gps_info.signal(), _gps_info.latitude(), _gps_info.longitude(),
+      _gps_info.speed(), _gps_info.direction());
   }
 
   // Get the last packet id

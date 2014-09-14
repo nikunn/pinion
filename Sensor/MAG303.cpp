@@ -1,4 +1,9 @@
-#include "MAG303.h"
+#include "Framework/LuaBind.h"
+#include "Framework/Logger.h"
+#include "Framework/Factory.h"
+#include "Acquisition/Daq.h"
+#include "Acquisition/Wire.h"
+#include "Sensor/MAG303.h"
 
 // Instantiates a new Adafruit_MAG303 class
 Adafruit_MAG303::Adafruit_MAG303(const LuaTable& cfg)

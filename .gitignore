@@ -1,0 +1,11 @@
+*.swp
+*.make
+*.d
+.ycm_extra_conf.pyc
+Build/Makefile
+Build/compile_commands.json
+Build/daq
+Build/lib/
+Build/logs/
+Build/obj/
+Build/readme

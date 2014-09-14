@@ -6,6 +6,8 @@
 #define USB_PACKET_SIZE 32
 #define I2C_PACKET_MAX_SIZE 32
 
+#define INITIAL_ERR_ADDRESS -1
+
 //=========================== Forward Declarations =============================
 
 class I2cWire;
@@ -23,6 +25,8 @@ public :
   void open();
   void close();
   void info();
+
+  static void errorCheck(int, const char*);
 
           //================= I2C Communication ==================
   void i2cSet(const I2cSensor&);

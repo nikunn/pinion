@@ -4,6 +4,7 @@
 #include<vector>
 
 #include "Sensor/Sensor.h"
+#include "Tools/Nmea.h"
 
 // Update rate command
 #define GPS_PMTK_UPDATE_1HZ  "$PMTK220,1000*1F\r\n"
@@ -49,6 +50,9 @@ private:
   std::vector<std::pair<CommandPacket, long> > _command_pending;
 
   int _rate;
+
+  GpsParser _gps_parser;
+  GpsInfo _gps_info;
 };
 
 #endif

@@ -1,4 +1,3 @@
-#include "LJM_Utilities.h"
 #include "LabJackM.h"
 
 #include "Framework/Logger.h"
@@ -28,10 +27,7 @@ void LabJackDaq::open()
 
   // Open first found LabJackDaq.
   err = LJM_OpenS("LJM_dtANY", "USB", "LJM_idANY", &_handle);
-  ErrorCheck(err, "LJM_Open");
-
-  // Logging level
-  EnableLoggingLevel(LJM_TRACE);
+  errorCheck(err, "LJM_Open");
 }
 
 // Close connection to labjack
@@ -42,7 +38,7 @@ void LabJackDaq::close()
 
   // Close.
   err = LJM_Close(handle());
-  ErrorCheck(err, "LJM_Close");
+  errorCheck(err, "LJM_Close");
 }
 
 // Print some informations about this labjack device
@@ -63,12 +59,39 @@ void LabJackDaq::info()
   // Get device info.
   err = LJM_GetHandleInfo(handle(), &deviceType, &connectionType, &serialNumber, &ipAddress,
       &portOrPipe, &packetMaxBytes);
-  ErrorCheck(err, "LJM_GetHandleInfo");
+  errorCheck(err, "LJM_GetHandleInfo");
 
   // Print device info.
-  PrintDeviceInfo(deviceType, connectionType, serialNumber, ipAddress, portOrPipe, packetMaxBytes);
+  INFO_LG("The maximum number of bytes in one packet is %d bytes");
 }
 
+void LabJackDaq::errorCheck(int err, const char * formattedDescription)
+{
+  // Define the string that contains warnings/errors
+  char errName[LJM_MAX_NAME_SIZE];
+
+  // Check if this is a warning
+  if (err >= LJME_WARNINGS_BEGIN && err <= LJME_WARNINGS_END)
+  {
+    // Get the string associated with this warning
+    LJM_ErrorToString(err, errName);
+
+    // Print a warning
+    WARNING_PF("LabJack: \"%s\" (warning code: %d)", errName, err);
+  }
+  // Check if this is an error
+  else if (err != LJME_NOERROR)
+  {
+    // Get the string associated with this error
+    LJM_ErrorToString(err, errName);
+
+    // Close connection to LabJack
+    LJM_CloseAll();
+
+    // Print a fatal and exit
+    FATAL_PF("LabJack: \"%s\" (error code: %d)", errName, err);
+  }
+}
 
 //=============================== I2c Communication ============================
 
@@ -90,15 +113,15 @@ void LabJackDaq::i2cSet(const I2cSensor& sensor)
 
     // Configure the I2C data line, SDA pin number
     err = LJM_eWriteName(handle(), "I2C_SDA_DIONUM", data_line);
-    ErrorCheck(err, "LJM_eWriteName (I2C_SDA_DIONUM)");
+    errorCheck(err, "LJM_eWriteName (I2C_SDA_DIONUM)");
 
     // Configure the I2C clock line, SCL pin number
     err = LJM_eWriteName(handle(), "I2C_SCL_DIONUM", clock_line);
-    ErrorCheck(err, "LJM_eWriteName (I2C_SCL_DIONUM)");
+    errorCheck(err, "LJM_eWriteName (I2C_SCL_DIONUM)");
 
     // Speed throttle is inversely proportional to clock frequency. 0 = max
     err = LJM_eWriteName(handle(), "I2C_SPEED_THROTTLE", 0);
-    ErrorCheck(err, "LJM_eWriteName (I2C_SPEED_THROTTLE)");
+    errorCheck(err, "LJM_eWriteName (I2C_SPEED_THROTTLE)");
 
     // A bit of log
     INFO_PF("Setting LabJack:%u I2C with data:%u clock:%u",
@@ -108,11 +131,11 @@ void LabJackDaq::i2cSet(const I2cSensor& sensor)
   // Options bits:
   // bit0: Reset the I2C bus.
   err = LJM_eWriteName(handle(), "I2C_OPTIONS", 0);
-  ErrorCheck(err, "LJM_eWriteName (I2C_OPTIONS)");
+  errorCheck(err, "LJM_eWriteName (I2C_OPTIONS)");
 
   // Configure the I2C address of Slave
   err = LJM_eWriteName(handle(), "I2C_SLAVE_ADDRESS", sensor.address());
-  ErrorCheck(err, "LJM_eWriteName (I2C_SLAVE_ADDRESS)");
+  errorCheck(err, "LJM_eWriteName (I2C_SLAVE_ADDRESS)");
 
   // Set the I2C wire
   _i2c_wire = wire;
@@ -130,11 +153,11 @@ void LabJackDaq::i2cRead(const I2cSensor& sensor, const byte regis, byte* data, 
 
   // Set the number of bytes to transmit
   err = LJM_eWriteName(handle(), "I2C_NUM_BYTES_TX", 1);
-  ErrorCheck(err, "LJM_eWriteName (I2C_NUM_BYTES_TX)");
+  errorCheck(err, "LJM_eWriteName (I2C_NUM_BYTES_TX)");
 
   // Set the number of bytes to receive
   err = LJM_eWriteName(handle(), "I2C_NUM_BYTES_RX", bytes_num);
-  ErrorCheck(err, "LJM_eWriteName (I2C_NUM_BYTES_RX)");
+  errorCheck(err, "LJM_eWriteName (I2C_NUM_BYTES_RX)");
 
   // Set the adress to read, from the memory pointer
   double regis_array[1];
@@ -142,11 +165,11 @@ void LabJackDaq::i2cRead(const I2cSensor& sensor, const byte regis, byte* data, 
   
   // Prepare the communication to write the address we will read from
   err = LJM_eWriteNameArray(handle(), "I2C_WRITE_DATA", 1, regis_array, &errorAddress);
-  ErrorCheckWithAddress(err, errorAddress, "LJM_eNames (I2C_WRITE_DATA)");
+  errorCheck(err, "LJM_eNames (I2C_WRITE_DATA)");
 
   // Do the I2C communications.
   err = LJM_eWriteName(handle(), "I2C_GO", 1);
-  ErrorCheck(err, "LJM_eWriteName (I2C_GO)");
+  errorCheck(err, "LJM_eWriteName (I2C_GO)");
 
   // RX bytes will go here
   double data_rx[I2C_PACKET_MAX_SIZE];
@@ -156,7 +179,7 @@ void LabJackDaq::i2cRead(const I2cSensor& sensor, const byte regis, byte* data, 
 
   // Get the data back from device to user space
   err = LJM_eReadNameArray(handle(), "I2C_READ_DATA", bytes_num, data_rx, &errorAddress);
-  ErrorCheckWithAddress(err, errorAddress, "LJM_eNames (I2C_READ_DATA)");
+  errorCheck(err, "LJM_eNames (I2C_READ_DATA)");
 
   // Populate the array of data
   for (i = 0; i < bytes_num; i++) { data[i] = (byte) data_rx[i]; }
@@ -182,11 +205,11 @@ void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, byte* data,
 
   // Set the number of bytes to transmit
   err = LJM_eWriteName(handle(), "I2C_NUM_BYTES_TX", bytes_num);
-  ErrorCheck(err, "LJM_eWriteName (I2C_NUM_BYTES_TX)");
+  errorCheck(err, "LJM_eWriteName (I2C_NUM_BYTES_TX)");
 
   // Set the number of bytes to receive
   err = LJM_eWriteName(handle(), "I2C_NUM_BYTES_RX", 0);
-  ErrorCheck(err, "LJM_eWriteName (I2C_NUM_BYTES_RX)");
+  errorCheck(err, "LJM_eWriteName (I2C_NUM_BYTES_RX)");
 
   // TX/RX bytes will go here
   double data_tx[I2C_PACKET_MAX_SIZE];
@@ -199,11 +222,11 @@ void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, byte* data,
 
   // Prepare the communication, put the data in device
   err = LJM_eWriteNameArray(handle(), "I2C_WRITE_DATA", bytes_num, data_tx, &errorAddress);
-  ErrorCheckWithAddress(err, errorAddress, "LJM_eNames (I2C_WRITE_DATA)");
+  errorCheck(err, "LJM_eNames (I2C_WRITE_DATA)");
 
   // Do the I2C communications.
   err = LJM_eWriteName(handle(), "I2C_GO", 1);
-  ErrorCheck(err, "LJM_eWriteName (I2C_GO)");
+  errorCheck(err, "LJM_eWriteName (I2C_GO)");
 }
 
 
@@ -220,23 +243,23 @@ void LabJackDaq::asynchSet(const AsynchSensor& sensor)
 
   // Configure the asynch receiving line
   err = LJM_eWriteName(handle(), "ASYNCH_TX_DIONUM", wire->transmitLine());
-  ErrorCheck(err, "LJM_eWriteName (ASYNCH_TX_DIONUM)");
+  errorCheck(err, "LJM_eWriteName (ASYNCH_TX_DIONUM)");
 
   // Configure the asynch transmitting line
   err = LJM_eWriteName(handle(), "ASYNCH_RX_DIONUM", wire->receiveLine());
-  ErrorCheck(err, "LJM_eWriteName (ASYNCH_RX_DIONUM)");
+  errorCheck(err, "LJM_eWriteName (ASYNCH_RX_DIONUM)");
 
   // Configure the number of data bits
   err = LJM_eWriteName(handle(), "ASYNCH_NUM_BITS", 8);
-  ErrorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BITS)");
+  errorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BITS)");
 
   // Configure the receiving buffer size
   err = LJM_eWriteName(handle(), "ASYNCH_RX_BUFFER_SIZE_BYTES", ASYNCH_BUFFER_SIZE);
-  ErrorCheck(err, "LJM_eWriteName (ASYNCH_RX_BUFFER_SIZE_BYTES)");
+  errorCheck(err, "LJM_eWriteName (ASYNCH_RX_BUFFER_SIZE_BYTES)");
 
   // Configure the baud rate
   err = LJM_eWriteName(handle(), "ASYNCH_BAUD", sensor.baud());
-  ErrorCheck(err, "LJM_eWriteName (ASYNCH_BAUD)");
+  errorCheck(err, "LJM_eWriteName (ASYNCH_BAUD)");
 }
 
 // Turn on Asynch. Configures timing hardware, DIO lines and allocates the receiving buffer
@@ -247,7 +270,7 @@ void LabJackDaq::asynchStart()
 
   // Enable Asynch communication
   err = LJM_eWriteName(handle(), "ASYNCH_ENABLE", 1);
-  ErrorCheck(err, "LJM_eWriteName (ASYNCH_ENABLE)");
+  errorCheck(err, "LJM_eWriteName (ASYNCH_ENABLE)");
 }
 
 // Turn off asynch
@@ -258,7 +281,7 @@ void LabJackDaq::asynchStop()
 
   // Disable Asynch communication
   err = LJM_eWriteName(handle(), "ASYNCH_ENABLE", 0);
-  ErrorCheck(err, "LJM_eWriteName (ASYNCH_ENABLE)");
+  errorCheck(err, "LJM_eWriteName (ASYNCH_ENABLE)");
 }
 
 // Read data in asynch
@@ -274,12 +297,12 @@ void LabJackDaq::asynchRead(byte* data, int& bytes_read)
   // Get the number of bytes that have been received
   double bytes_buffer;
   err = LJM_eReadName(handle(), "ASYNCH_NUM_BYTES_RX", &bytes_buffer);
-  ErrorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BYTES_RX)");
+  errorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BYTES_RX)");
 
   // Get the number of bytes that have been received
   double bytes_buffer_check;
   err = LJM_eReadName(handle(), "ASYNCH_NUM_BYTES_RX", &bytes_buffer_check);
-  ErrorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BYTES_RX)");
+  errorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BYTES_RX)");
 
   // Check if data is currently being written to the device
   if ((int) bytes_buffer != (int) bytes_buffer_check)
@@ -302,7 +325,7 @@ void LabJackDaq::asynchRead(byte* data, int& bytes_read)
 
     // Get the data back from device
     err = LJM_eReadNameArray(handle(), "ASYNCH_DATA_RX", bytes_num, data_rx, &errorAddress);
-    ErrorCheckWithAddress(err, errorAddress, "LJM_eNames (ASYNCH_READ_DATA)");
+    errorCheck(err, "LJM_eNames (ASYNCH_READ_DATA)");
 
     // Check we are not exceeding the buffer size
     if (bytes_read + bytes_num >= ASYNCH_BUFFER_SIZE)
@@ -326,7 +349,7 @@ void LabJackDaq::asynchRead(byte* data, int& bytes_read)
 
       // Get the number of byte to be read for next iteration
       err = LJM_eReadName(handle(), "ASYNCH_NUM_BYTES_RX", &bytes_buffer);
-      ErrorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BYTES_RX)");
+      errorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BYTES_RX)");
     }
   }
 }
@@ -346,7 +369,7 @@ void LabJackDaq::asynchWrite(const CommandPacket& cmd)
 
   // Set the number of bytes to transmit
   err = LJM_eWriteName(handle(), "ASYNCH_NUM_BYTES_TX", cmd_str.size());
-  ErrorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BYTES_TX)");
+  errorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BYTES_TX)");
 
   // TX bytes will go here
   double data_tx[USB_PACKET_SIZE];
@@ -370,7 +393,7 @@ void LabJackDaq::asynchWrite(const CommandPacket& cmd)
 
     // Write the data to device
     err = LJM_eWriteNameArray(handle(), "ASYNCH_DATA_TX", bytes_towrite, data_tx, &errorAddress);
-    ErrorCheckWithAddress(err, errorAddress, "LJM_eNames (ASYNCH_WRITE_DATA)");
+    errorCheck(err, "LJM_eNames (ASYNCH_WRITE_DATA)");
 
     // Update the number of bytes already written to the device
     bytes_written += bytes_towrite;
@@ -379,9 +402,9 @@ void LabJackDaq::asynchWrite(const CommandPacket& cmd)
   // Write to device the number of bytes that are to be transmitted
   double bytes_buffer;
   err = LJM_eReadName(handle(), "ASYNCH_NUM_BYTES_TX", &bytes_buffer);
-  ErrorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BYTES_TX)");
+  errorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BYTES_TX)");
 
   // Asynch communication to write the data from the device to the sensor
   err = LJM_eWriteName(handle(), "ASYNCH_TX_GO", 1);
-  ErrorCheck(err, "LJM_eWriteName (ASYNCH_TX_GO)");
+  errorCheck(err, "LJM_eWriteName (ASYNCH_TX_GO)");
 }

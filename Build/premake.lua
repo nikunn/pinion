@@ -23,7 +23,17 @@ project "external"
   kind "SharedLib"
   links { "lua5.2" }
   files { "../Framework/LuaBind.cpp", "../Framework/Logger.cpp" }
-  includedirs { "../", "/usr/include/lua5.2/", "../Include/Sol/", "../Include/Log/src/" }
+  includedirs { "../", "/usr/include/lua5.2/", "../Include/Sol/", "../Include/Log/src/", "../Include/Nmea/include/" }
+  targetdir "lib/"
+
+
+------------------------------------- Nmea -------------------------------------
+-- Compile some external library
+project "nmea"
+  kind "SharedLib"
+  files { "../Tools/Nmea.cpp", "../Include/Nmea/src/*.c" }
+  includedirs { "../", "../Include/Nmea/include/" }
+  buildoptions "-w"
   targetdir "lib/"
 
 
@@ -36,12 +46,12 @@ project "framework"
   targetdir "lib/"
 
 
------------------------------------ Framework ----------------------------------
+------------------------------------ Sensor ------------------------------------
 project "sensor"
   kind "SharedLib"
-  links { "external" }
+  links { "external", "nmea" }
   files { "../Sensor/All.cpp" }
-  includedirs { "../", "/usr/include/lua5.2/", "../Include/Sol/" }
+  includedirs { "../", "/usr/include/lua5.2/", "../Include/Sol/", "../Include/Nmea/include/" }
   targetdir "lib/"
 
 
@@ -49,8 +59,8 @@ project "sensor"
 project "daq"
   kind "ConsoleApp"
   files { "main.cpp" }
-  links { "external", "framework", "sensor", "LabJackM" }
-  includedirs { "../", "/usr/include/lua5.2/", "../Include/Sol/" }
+  links { "external", "nmea", "framework", "sensor", "LabJackM" }
+  includedirs { "../", "/usr/include/lua5.2/", "../Include/Sol/", "../Include/Nmea/include/" }
   linkoptions { "-Wl,-rpath,./lib/" }
 
 -------------------------------------- End -------------------------------------
