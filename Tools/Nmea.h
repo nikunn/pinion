@@ -5,6 +5,8 @@
 class GpsInfo
 {
 public:
+
+  //============================ public functions ============================
   GpsInfo();
   ~GpsInfo();
 
@@ -19,6 +21,8 @@ public:
   double speed() { return _info.speed; }
 
 private:
+
+  //=========================== private members ============================
   nmeaINFO _info;
 };
 
@@ -26,11 +30,15 @@ private:
 class GpsParser
 {
 public:
+
+  //============================ public functions ============================
   GpsParser();
   ~GpsParser();
 
   void parse(const std::string&, GpsInfo&);
 
 private:
+
+  //=========================== private members ============================
   nmeaPARSER _parser;
 };

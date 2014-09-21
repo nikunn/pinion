@@ -6,8 +6,15 @@
 #include "Framework/Factory.h"
 #include "Framework/Universe.h"
 
+// Include the data acquisition device file
 #include "Acquisition/Daq.h"
+#if defined __DEVICE_LAB__
 #include "Acquisition/LabJackDaq.cpp"
+#elif defined __DEVICE_RPI__
+#include "Acquisition/RaspberryPiDaq.cpp"
+#elif defined __DEVICE_BBB__
+#include "Acquisition/BeagleBoneDaq.cpp"
+#endif
 
 #include "Sensor/All.h"
 
@@ -16,7 +23,13 @@
 int main()
 {
   // Register all the classes in the factory
+  #if defined __DEVICE_LAB__
   Factory::registerClass("LabJack", new CreatorType<LabJackDaq>);
+  #elif defined __DEVICE_RPI__
+  Factory::registerClass("RaspberryPi", new CreatorType<RaspberryPiDaq>);
+  #elif defined __DEVICE_BBB__
+  Factory::registerClass("BeagleBone", new CreatorType<BeagleBoneDaq>);
+  #endif
   Factory::registerClass("AsynchWire", new CreatorType<AsynchWire>);
   Factory::registerClass("I2cWire", new CreatorType<I2cWire>);
   Factory::registerClass("GPS", new CreatorType<Adafruit_GPS>);
