@@ -2,7 +2,7 @@
 
 #include "Framework/Logger.h"
 #include "Acquisition/LabJackDaq.h"
-#include "Acquisition/Wire.cpp"
+#include "Acquisition/Wire.h"
 #include "Sensor/Sensor.h"
 
 //=============================== LabJackDaq ================================
@@ -149,7 +149,7 @@ void LabJackDaq::i2cRead(const I2cSensor& sensor, const byte regis, byte* data, 
 
   // Define some variable
   int err, i;
-  int errorAddress = INITIAL_ERR_ADDRESS;
+  int errorAddress = LABJACK_INIT_ERR_ADDR;
 
   // Set the number of bytes to transmit
   err = LJM_eWriteName(handle(), "I2C_NUM_BYTES_TX", 1);
@@ -172,7 +172,7 @@ void LabJackDaq::i2cRead(const I2cSensor& sensor, const byte regis, byte* data, 
   errorCheck(err, "LJM_eWriteName (I2C_GO)");
 
   // RX bytes will go here
-  double data_rx[I2C_PACKET_MAX_SIZE];
+  double data_rx[LABJACK_I2C_PACKET_SIZE];
 
   // Initialize the array of data to be read
   for (i = 0; i < bytes_num; i++) { data_rx[i] = 0; }
@@ -186,7 +186,7 @@ void LabJackDaq::i2cRead(const I2cSensor& sensor, const byte regis, byte* data, 
 }
 
 // Write data in I2C
-void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, byte* data, int bytes_num)
+void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const byte* data, int bytes_num)
 {
   // Set the configuration for communicating with this sensor
   i2cSet(sensor);
@@ -201,7 +201,7 @@ void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, byte* data,
 
   // Initialize some variables
   int err, i;
-  int errorAddress = INITIAL_ERR_ADDRESS;
+  int errorAddress = LABJACK_INIT_ERR_ADDR;
 
   // Set the number of bytes to transmit
   err = LJM_eWriteName(handle(), "I2C_NUM_BYTES_TX", bytes_num);
@@ -212,7 +212,7 @@ void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, byte* data,
   errorCheck(err, "LJM_eWriteName (I2C_NUM_BYTES_RX)");
 
   // TX/RX bytes will go here
-  double data_tx[I2C_PACKET_MAX_SIZE];
+  double data_tx[LABJACK_I2C_PACKET_SIZE];
   
   // Set the adress to write to, the memory pointer, first thing to write
   data_tx[0] = (double)regis;
@@ -292,7 +292,7 @@ void LabJackDaq::asynchRead(byte* data, int& bytes_read)
 
   // Define some variable
   int err, i;
-  int errorAddress = INITIAL_ERR_ADDRESS;
+  int errorAddress = LABJACK_INIT_ERR_ADDR;
 
   // Get the number of bytes that have been received
   double bytes_buffer;
@@ -311,17 +311,17 @@ void LabJackDaq::asynchRead(byte* data, int& bytes_read)
     return;
   }
 
-  // Read the bytes by small chunk of USB_PACKET_SIZE
+  // Read the bytes by small chunk of LABJACK_USB_PACKET_SIZE
   while (bytes_buffer > 0)
   {
     // Initiliaze number of byte to read from device
-    int bytes_num = std::min((int) bytes_buffer, USB_PACKET_SIZE);
+    int bytes_num = std::min((int) bytes_buffer, LABJACK_USB_PACKET_SIZE);
 
     // RX bytes will go here
-    double data_rx[USB_PACKET_SIZE];
+    double data_rx[LABJACK_USB_PACKET_SIZE];
 
     // Initialize the array of data to be read
-    for (i = 0; i < USB_PACKET_SIZE; i++) { data_rx[i] = 0; }
+    for (i = 0; i < LABJACK_USB_PACKET_SIZE; i++) { data_rx[i] = 0; }
 
     // Get the data back from device
     err = LJM_eReadNameArray(handle(), "ASYNCH_DATA_RX", bytes_num, data_rx, &errorAddress);
@@ -365,14 +365,14 @@ void LabJackDaq::asynchWrite(const CommandPacket& cmd)
 
   // Define some variable
   int err, i;
-  int errorAddress = INITIAL_ERR_ADDRESS;
+  int errorAddress = LABJACK_INIT_ERR_ADDR;
 
   // Set the number of bytes to transmit
   err = LJM_eWriteName(handle(), "ASYNCH_NUM_BYTES_TX", cmd_str.size());
   errorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BYTES_TX)");
 
   // TX bytes will go here
-  double data_tx[USB_PACKET_SIZE];
+  double data_tx[LABJACK_USB_PACKET_SIZE];
 
   // Initalize the number of bytes to write and already written
   int bytes_command = cmd_str.size();
@@ -382,7 +382,7 @@ void LabJackDaq::asynchWrite(const CommandPacket& cmd)
   while (bytes_written < bytes_command)
   {
     // Compute number of bytes to write
-    int bytes_towrite = std::min(bytes_command - bytes_written, USB_PACKET_SIZE);
+    int bytes_towrite = std::min(bytes_command - bytes_written, LABJACK_USB_PACKET_SIZE);
 
     // Initialize the array of data to be read
     for (i = 0; i < bytes_towrite; i++)

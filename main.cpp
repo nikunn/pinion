@@ -7,7 +7,6 @@
 #include "Framework/Universe.h"
 
 // Include the data acquisition device file
-#include "Acquisition/Daq.h"
 #if defined __DEVICE_LAB__
 #include "Acquisition/LabJackDaq.cpp"
 #elif defined __DEVICE_RPI__
@@ -52,18 +51,20 @@ int main()
   // Create the universe
   Universe::createUniverse(lua_state);
 
-
-
-
-
-  LabJackDaq* labd = static_cast<LabJackDaq*>(Factory::get("LBJ"));
+  #if defined __DEVICE_LAB__
+  LabJackDaq* daq_device = static_cast<LabJackDaq*>(Factory::get("LBJ"));
+  #elif defined __DEVICE_RPI__
+  RaspberryPiDaq* daq_device = static_cast<RaspberryPiDaq*>(Factory::get("RPI"));
+  #elif defined __DEVICE_BBB__
+  BeagleBone* daq_device = static_cast<BeagleBone*>(Factory::get("BBB"));
+  #endif
 
   Adafruit_GPS* gps = static_cast<Adafruit_GPS*>(Factory::get("GPS"));
   Adafruit_LSM303* accel = static_cast<Adafruit_LSM303*>(Factory::get("Accel"));
   Adafruit_MAG303* magneto = static_cast<Adafruit_MAG303*>(Factory::get("Magneto"));
   Adafruit_L3GD20* gyro = static_cast<Adafruit_L3GD20*>(Factory::get("Gyro"));
 
-  labd->open();
+  daq_device->open();
 
 
   if (gyro->init()) { INFO_LG("Gyro init ok"); }

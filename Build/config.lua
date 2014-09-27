@@ -64,6 +64,7 @@ Catalog =
   {
     name="I2cWire",
     class="I2cWire",
+    bus = 1,
     data_line = 2,
     clock_line = 3,
   },

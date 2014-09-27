@@ -2,6 +2,7 @@
 #define _WIRE_H
 
 #include "Framework/Accessible.h"
+#include "Framework/LuaBind.h"
 
 //=================================== Wire =====================================
 class Wire : public Accessible
@@ -21,13 +22,18 @@ class I2cWire : public Wire
 {
 public :
   I2cWire(const LuaTable& cfg);
+  ~I2cWire();
 
+  int handle() const { return _handle; }
   int dataLine() const { return _data_line; }
   int clockLine() const { return _clock_line; }
 
 private :
   int _data_line;
   int _clock_line;
+
+  int _handle;
+  int _bus;
 };
 
 

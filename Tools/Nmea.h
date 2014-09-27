@@ -1,3 +1,6 @@
+#ifndef _NMEA_H
+#define _NMEA_H
+
 #include <nmea/nmea.h>
 #include <string>
 
@@ -42,3 +45,6 @@ private:
   //=========================== private members ============================
   nmeaPARSER _parser;
 };
+
+
+#endif

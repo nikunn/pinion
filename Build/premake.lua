@@ -19,12 +19,12 @@ device_def["bbb"] = "__DEVICE_BBB__"
 
 local device_lib = {}
 device_lib["lab"] = "LabJackM"
-device_lib["rpi"] = ""
-device_lib["bbb"] = ""
+device_lib["rpi"] = nil
+device_lib["bbb"] = nil
 
 -- Set default device to LabJack
 if not _OPTIONS["device"] then
-  _OPTIONS["device"] = "lab"
+  _OPTIONS["device"] = "rpi"
 end
 
 -- Get the data acquisition device
@@ -54,8 +54,8 @@ solution "daq"
 project "external"
   kind "SharedLib"
   links { "lua5.2" }
-  files { "../Framework/LuaBind.cpp", "../Framework/Logger.cpp" }
-  includedirs { "../", "/usr/include/lua5.2/", "../Include/Sol/", "../Include/Log/src/", "../Include/Nmea/include/" }
+  files { "Src/Framework/LuaBind.cpp", "Src/Framework/Logger.cpp" }
+  includedirs { "Src/", "/usr/include/lua5.2/", "Src/Include/Sol/", "Src/Include/Log/src/", "Src/Include/Nmea/include/" }
   targetdir "lib/"
 
 
@@ -63,8 +63,8 @@ project "external"
 -- Compile some external library
 project "nmea"
   kind "SharedLib"
-  files { "../Tools/Nmea.cpp", "../Include/Nmea/src/*.c" }
-  includedirs { "../", "../Include/Nmea/include/" }
+  files { "Src/Tools/Nmea.cpp", "Src/Include/Nmea/src/*.c" }
+  includedirs { "Src/", "Src/Include/Nmea/include/" }
   buildoptions "-w"
   targetdir "lib/"
 
@@ -73,8 +73,8 @@ project "nmea"
 project "framework"
   kind "SharedLib"
   links { "external" }
-  files { "../Framework/Factory.cpp", "../Framework/Universe.cpp" }
-  includedirs { "../", "/usr/include/lua5.2/", "../Include/Sol/" }
+  files { "Src/Framework/Factory.cpp", "Src/Framework/Universe.cpp" }
+  includedirs { "Src/", "/usr/include/lua5.2/", "Src/Include/Sol/" }
   targetdir "lib/"
 
 
@@ -82,17 +82,18 @@ project "framework"
 project "sensor"
   kind "SharedLib"
   links { "external", "nmea" }
-  files { "../Sensor/All.cpp" }
-  includedirs { "../", "/usr/include/lua5.2/", "../Include/Sol/", "../Include/Nmea/include/" }
+  files { "Src/Sensor/All.cpp" }
+  includedirs { "Src/", "/usr/include/lua5.2/", "Src/Include/Sol/", "Src/Include/Nmea/include/" }
   targetdir "lib/"
 
 
 ---------------------------------- Acquisition ---------------------------------
 project "daq"
   kind "ConsoleApp"
-  files { "main.cpp" }
-  links { "external", "nmea", "framework", "sensor", device_lib[device] }
-  includedirs { "../", "/usr/include/lua5.2/", "../Include/Sol/", "../Include/Nmea/include/" }
+  files { "Src/Tools/I2C.cpp", "Src/Acquisition/Wire.cpp", "Src/main.cpp" }
+  links { "external", "nmea", "framework", "sensor"}
+  if device_lib[device] then links { device_lib[device] } end
+  includedirs { "Src/", "/usr/include/lua5.2/", "Src/Include/Sol/", "Src/Include/Nmea/include/" }
   defines { device_def[device] }
   linkoptions { "-Wl,-rpath,./lib/" }
 
