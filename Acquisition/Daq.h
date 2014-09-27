@@ -26,7 +26,7 @@ public :  //======================== Public ======================
           //================= I2C Communication ==================
   virtual void i2cSet(const I2cSensor&) {};
   virtual void i2cRead(const I2cSensor&, const byte regis, byte* data, const int bytes_num = 1) = 0;
-  virtual void i2cWrite(const I2cSensor&, const byte regis, const byte* data, int bytes_num = 1) = 0;
+  virtual void i2cWrite(const I2cSensor&, const byte regis, const byte* data, const int bytes_num = 1) = 0;
 
           //================= Asynch Communication ===============
   virtual void asynchStart() = 0;

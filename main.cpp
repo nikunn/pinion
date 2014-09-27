@@ -59,35 +59,37 @@ int main()
   BeagleBone* daq_device = static_cast<BeagleBone*>(Factory::get("BBB"));
   #endif
 
-  Adafruit_GPS* gps = static_cast<Adafruit_GPS*>(Factory::get("GPS"));
-  Adafruit_LSM303* accel = static_cast<Adafruit_LSM303*>(Factory::get("Accel"));
-  Adafruit_MAG303* magneto = static_cast<Adafruit_MAG303*>(Factory::get("Magneto"));
+  //Adafruit_GPS* gps = static_cast<Adafruit_GPS*>(Factory::get("GPS"));
+  //Adafruit_LSM303* accel = static_cast<Adafruit_LSM303*>(Factory::get("Accel"));
+  //Adafruit_MAG303* magneto = static_cast<Adafruit_MAG303*>(Factory::get("Magneto"));
   Adafruit_L3GD20* gyro = static_cast<Adafruit_L3GD20*>(Factory::get("Gyro"));
 
   daq_device->open();
 
+  if (gyro->init())
+  {
+    INFO_LG("Gyro init ok");
 
-  if (gyro->init()) { INFO_LG("Gyro init ok"); }
+    while (true)
+    {
+      gyro->get();
+      usleep(300000);
+      //accel->get();
+      //usleep(100000);
+      //magneto->get();
+      //usleep(100000);
+    }
+  }
   else { INFO_LG("Gyro init failed"); }
 
-  if (accel->init()) { INFO_LG("Accel init ok"); }
-  else { INFO_LG("Accel init failed"); }
+  //if (accel->init()) { INFO_LG("Accel init ok"); }
+  //else { INFO_LG("Accel init failed"); }
 
-  if (magneto->init()) { INFO_LG("Magneto init ok"); }
-  else { INFO_LG("Magneto init failed"); }
+  //if (magneto->init()) { INFO_LG("Magneto init ok"); }
+  //else { INFO_LG("Magneto init failed"); }
+
 
   /*
-  while (true)
-  {
-    gyro->get();
-    usleep(100000);
-    accel->get();
-    usleep(100000);
-    magneto->get();
-    usleep(100000);
-  }
-  */
-
   gps->stop();
   gps->start();
   if (gps->init()) { INFO_LG("GPS init ok"); }
@@ -97,4 +99,5 @@ int main()
     gps->get();
     usleep(1000);
   }
+  */
 }

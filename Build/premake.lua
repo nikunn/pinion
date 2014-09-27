@@ -91,7 +91,7 @@ project "sensor"
 project "daq"
   kind "ConsoleApp"
   files { "Src/Tools/I2C.cpp", "Src/Acquisition/Wire.cpp", "Src/main.cpp" }
-  links { "external", "nmea", "framework", "sensor"}
+  links { "external", "nmea", "framework", "sensor", "lua5.2" }
   if device_lib[device] then links { device_lib[device] } end
   includedirs { "Src/", "/usr/include/lua5.2/", "Src/Include/Sol/", "Src/Include/Nmea/include/" }
   defines { device_def[device] }

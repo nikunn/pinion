@@ -1,4 +1,5 @@
 #include "Framework/Logger.h"
+#include "Tools/I2C.h"
 #include "Acquisition/RaspberryPiDaq.h"
 #include "Acquisition/Wire.h"
 #include "Sensor/Sensor.h"
@@ -29,16 +30,20 @@ void RaspberryPiDaq::info()
 {
 }
 
-//=============================== I2c Communication ============================
+//=============================== I2C Communication ============================
 
 // Read data in I2C
 void RaspberryPiDaq::i2cRead(const I2cSensor& sensor, const byte regis, byte* data, const int bytes_num)
 {
+  // Execute the I2C communication
+  int result = I2cLinux::i2cRead(sensor.wire()->handle(), sensor.address(), regis, data, bytes_num);
 }
 
 // Write data in I2C
-void RaspberryPiDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const byte* data, int bytes_num)
+void RaspberryPiDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const byte* data, const int bytes_num)
 {
+  // Execute the I2C communication
+  int result = I2cLinux::i2cWrite(sensor.wire()->handle(), sensor.address(), regis, data, bytes_num);
 }
 
 

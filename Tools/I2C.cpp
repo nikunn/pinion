@@ -1,10 +1,6 @@
-//#include <sys/types.h>
-//#include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <fcntl.h>
-//#include <stdio.h>
-//#include <stdlib.h>
 
 #include "Include/I2cTools/include/linux/i2c-dev.h"
 #include "Framework/Logger.h"
@@ -79,57 +75,79 @@ void I2cLinux::i2cClose(int handle)
 
 // Create a sequence to read some bytes and execute the communication
 // Example of such sequence {0x70, 0x8a, I2C_RESTART, 0x71, I2C_READ};
-int I2cLinux::i2cCom(const int handle, const byte address, const byte regis, 
-                     const bool write, byte* data, const int bytes_num)
+int I2cLinux::i2cRead(const int handle, const byte address, const byte regis,
+                      byte* data, const int bytes_num)
 {
-  // Create slave adress plus read/write bit for convenience
-  byte addr_read = address | 1;
-  byte addr_write =address & ~1;
+  // Create slave adress adding read/write bit from sensor 7bit address
+  byte addr_read = (address << 1) | 1;
+  byte addr_write = (address << 1) & ~1;
 
   // Define the sequence length
   int sequence_len = bytes_num + 4;
-  
+
+  // Initialize the sequence
+  uint16_t* sequence = new uint16_t[sequence_len];
+
+  // The first byte of the sequence is the slave write address as we will write register
+  sequence[0] = addr_write;
+
+  // The second byte is the register pointer that we will read data from
+  sequence[1] = regis;
+
+  // The third byte is a restart, start a new segment to read the data
+  sequence[2] = I2C_RESTART;
+
+  // The fourth byte is the slave read/write address
+  sequence[3] = addr_read;
+
+  // Fill the rest of the sequence
+  for (int i = 0; i < bytes_num; i++) { sequence[4 + i] = I2C_READ; }
+
+  // Execute the I2C communication with this sequence
+  int result = sendSequence(handle, sequence, sequence_len, data);
+
+  // delete the sequence
+  delete sequence;
+
+  // Return result
+  return result;
+}
+
+// Create a sequence to read some bytes and execute the communication
+// For write the sequence is only one segment
+int I2cLinux::i2cWrite(const int handle, const byte address, const byte regis,
+                       const byte* data, const int bytes_num)
+{
+  // Create slave write adress adding write bit from sensor 7bit address
+  byte addr_write = (address << 1) & ~1;
+
+  // Define the sequence length
+  int sequence_len = bytes_num + 2;
+
   // Initialize the sequence
   uint16_t* sequence = new uint16_t[sequence_len];
 
   // The first byte of the sequence is the slave write address
   sequence[0] = addr_write;
 
-  // The second byte is the register pointer that we will read/write data from later
+  // The second byte is the register pointer that we will write data to
   sequence[1] = regis;
 
-  // The third byte is a restart
-  sequence[2] = I2C_RESTART;
-
-  // The fourth byte is the slave read/write address
-  sequence[3] = write ? addr_write : addr_read;
-
-  // Fill the rest of the sequence
-  for (int i = 0; i < bytes_num; i++)
-  {
-    // The rest of the sequence is made of the data we want to write
-    if (write)
-    {
-      sequence[3 + i] = data[i];
-    }
-    // The rest of the sequence is made of as many I2C_READ as bytes_num
-    else
-    {
-      sequence[3 + i] = I2C_READ;
-    }
-  }
+  // The rest of the sequence is made of the data we want to write
+  for (int i = 0; i < bytes_num; i++) { sequence[2 + i] = data[i]; }
 
   // Execute the I2C communication with this sequence
-  int result = sendSequence(handle, sequence, sequence_len, write ? NULL : data);
+  int result = sendSequence(handle, sequence, sequence_len, NULL);
 
   // delete the sequence
   delete sequence;
-  
+
   // Return result
   return result;
 }
 
-// Count the number of segments in an I2C sequence befor allocating the message buffer
+// Count the number of segments in an I2C sequence before allocating the message buffer
+// There is an upper limit on the number of segments (restarts): no more than 42.
 int I2cLinux::countSegments(uint16_t *sequence, int sequence_len)
 {
   // Initialize counter, there is always at least one segment
@@ -146,16 +164,8 @@ int I2cLinux::countSegments(uint16_t *sequence, int sequence_len)
   return segments_num;
 }
 
-/*
-  Sends a command/data sequence that can include restarts, writes and reads.
-
-  sequence is the I2C operation sequence that should be performed. 
-  reads. Note that the sequence is composed of uint16_t, not byte.
-  This is because we have to support out-of-band
-  signalling of I2C_RESTART and I2C_READ operations, while still passing through 8-bit data.
-
-  there is an upper limit on the number of segments (restarts): no more than 42.
-*/
+// Sends a command/data sequence that can include restarts, writes and reads.
+// Note that the sequence is composed of uint16_t, not byte.
 int I2cLinux::sendSequence(int handle, uint16_t* sequence, int sequence_len, byte* rcv_data)
 {
   // Initialize the message sequence
@@ -172,7 +182,7 @@ int I2cLinux::sendSequence(int handle, uint16_t* sequence, int sequence_len, byt
   {
     // Dump an error log
     ERROR_LG("I2C communication failure, wrong sequence/segment length")
-    
+
     // Exit, return failure code
     return result;
   }
@@ -181,31 +191,19 @@ int I2cLinux::sendSequence(int handle, uint16_t* sequence, int sequence_len, byt
   i2c_msg* messages = new i2c_msg[segments_num];
   i2c_msg* current_message = messages;
 
-  /* msg_buf needs to hold all *bytes written* in the entire sequence.
-   * Since it is difficult to estimate that number without processing the sequence,
-   * we make an upper-bound guess: sequence_len. Yes, this is inefficient, but
-     optimizing this doesn't seem to be worth the effort. */
-
+  // msg_buf needs to hold all *bytes written* in the entire sequence.
   byte* msg_buf = new byte[sequence_len];
   byte* msg_cur_buf_ptr = msg_buf;
-  byte* msg_cur_buf_base;
-  int msg_cur_buf_size;
-
-  // The I2C adress
-  byte address;
-
-  // Whether we are writing or reading
-  byte rw;
 
   // Get the address, it is always the first byte
-  address = sequence[0];
+  byte address = sequence[0];
 
   // The LSB of the address is the read write bit
-  rw = address & 1;
+  byte rw = address & 1;
 
   // Initialize the buffer
-  msg_cur_buf_size = 0;
-  msg_cur_buf_base = msg_cur_buf_ptr;
+  int msg_cur_buf_size = 0;
+  byte* msg_cur_buf_base = msg_cur_buf_ptr;
 
   // Initialize a counter to go through the sequence
   int i = 1;
@@ -237,11 +235,11 @@ int I2cLinux::sendSequence(int handle, uint16_t* sequence, int sequence_len, byt
       // Increment the current message pointer
       current_message++;
 
-      // If this is a read, increment 
+      // If this is a read, increment
       if(rw == READING) { rcv_data += msg_cur_buf_size; }
 
       // Check if there is more transaction
-      if(i < sequence_len - 2) 
+      if(i < sequence_len - 2)
       {
         // Get the address, it is always the first byte
         address = sequence[++i];
@@ -259,7 +257,7 @@ int I2cLinux::sendSequence(int handle, uint16_t* sequence, int sequence_len, byt
     i++;
   }
 
-  // 
+  // Populate the message sequence structure
   message_seq.msgs = messages;
   message_seq.nmsgs = segments_num;
 

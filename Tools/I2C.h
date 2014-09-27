@@ -1,3 +1,5 @@
+// This is an altered version of https://github.com/jwr/lsquaredc
+
 #ifndef _I2C_LINUX_H
 #define _I2C_LINUX_H
 
@@ -6,11 +8,14 @@
 class I2cLinux
 {
 public :  //======================== Public ======================
-  static int i2cCom(const int handle, const byte address, const byte regis, 
-                    const bool write, byte* data, const int bytes_num);
+  static int i2cRead(const int handle, const byte address, const byte regis,
+                     byte* data, const int bytes_num);
+
+  static int i2cWrite(const int handle, const byte address, const byte regis,
+                      const byte* data, const int bytes_num);
 
   static int i2cOpen(int bus);
-  static void i2cClose(int handle); 
+  static void i2cClose(int handle);
   static void i2cCheck(int handle, char* device_name);
 
 private : //======================= Private ======================

@@ -7,13 +7,13 @@ Universe =
   -- List of data acquisition devices
   {
     -- LabJack Device
-    "LBJ",
-
-    -- Arduino Device
-    --"ARD1",
+    --"LBJ",
 
     -- Raspberry Device
-    --"RSB1",
+    "RPI",
+
+    -- BeagleBone Device
+    --"BBB",
   },
 
   -- List of wires connecting the sensors
@@ -51,6 +51,12 @@ Catalog =
     class = "LabJack",
   },
 
+  RPI =
+  {
+    name = "RPI",
+    class = "RaspberryPi",
+  },
+
     ---------------------------------- Wire --------------------------------
   AsynchWire = 
   {
@@ -72,7 +78,7 @@ Catalog =
     -------------------------------- Sensors -------------------------------
   GPS =
   {
-    device = "LBJ",
+    device = "RPI",
     name="GPS",
     class="GPS",
     wire="AsynchWire",
@@ -82,7 +88,7 @@ Catalog =
 
   Accel =
   {
-    device = "LBJ",
+    device = "RPI",
     name="Accel",
     class="LSM303",
     wire="I2cWire",
@@ -91,7 +97,7 @@ Catalog =
 
   Magneto =
   {
-    device = "LBJ",
+    device = "RPI",
     name="Magneto",
     class="MAG303",
     wire="I2cWire",
@@ -100,7 +106,7 @@ Catalog =
 
   Gyro =
   {
-    device = "LBJ",
+    device = "RPI",
     name="Gyro",
     class="L3GD20",
     wire="I2cWire",

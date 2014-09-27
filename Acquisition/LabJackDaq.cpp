@@ -186,7 +186,7 @@ void LabJackDaq::i2cRead(const I2cSensor& sensor, const byte regis, byte* data, 
 }
 
 // Write data in I2C
-void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const byte* data, int bytes_num)
+void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const byte* data, const int bytes_num_ex)
 {
   // Set the configuration for communicating with this sensor
   i2cSet(sensor);
@@ -197,7 +197,7 @@ void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const byte*
   // two bytes because byte 16 is the start of a new page.
 
   // We need to put the register we are going to write to at the begining of the data
-  bytes_num += 1;
+  bytes_num = bytes_num_ex + 1;
 
   // Initialize some variables
   int err, i;
