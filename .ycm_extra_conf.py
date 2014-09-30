@@ -17,6 +17,7 @@ flags = [
 # relevant for c++ headers.
 '-x',
 'c++',
+'-I./',
 '/usr/include',
 '/usr/local/include',
 '/usr/local/include/LabJackM.h',

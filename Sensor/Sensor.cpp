@@ -1,26 +1,22 @@
 #include "Framework/Logger.h"
 #include "Acquisition/Daq.h"
+#include "Acquisition/Wire.h"
 #include "Sensor/Sensor.h"
 
 //==================================== Sensor ==================================
-
-// Convert two byte to 16 bit int
-/*static*/ int16_t Sensor::int8To16(byte* ent)
+Sensor::Sensor(const LuaTable& cfg)
 {
-  return ((int16_t)ent[0] << 8) | ent[1];
-}
-
-// Convert two byte to 16 bit int
-/*static*/ int16_t Sensor::int8To16(byte hi, byte lo)
-{
-  return ((int16_t)hi << 8) | lo;
+  // Set Data Acquisition device
+  std::string daq_name = cfg.get<std::string>("daq");
+  _daq = static_cast<DaqDevice*>(Factory::get(daq_name));
 }
 
 //=================================== I2cSensor ================================
-// Set the acquisition device to communicate with this sensor
-void I2cSensor::set()
+I2cSensor::I2cSensor(const LuaTable& cfg) : Sensor(cfg)
 {
-  daq().i2cSet(*this);
+  // Set Wire
+  std::string wire_name = cfg.get<std::string>("wire");
+  _wire = static_cast<I2cWire*>(Factory::get(wire_name));
 }
 
 // Read sensor data from acquisition device
@@ -36,28 +32,28 @@ void I2cSensor::write(const byte regis, byte* data, const int bytes_num)
 }
 
 //================================== AsynchSensor ==============================
+AsynchSensor::AsynchSensor(const LuaTable& cfg) : Sensor(cfg)
+{
+  // Set Wire
+  std::string wire_name = cfg.get<std::string>("wire");
+  _wire = static_cast<AsynchWire*>(Factory::get(wire_name));
+}
 
 // Set Baud rate
-void AsynchSensor::setBaud(const CommandPacket& cmd, const uint32_t baud_rate)
+void AsynchSensor::setBaud(const CommandPacket& cmd, const long baud_rate)
 {
   // Send the command to change the baud to the sensor
-  daq().asynchWrite(cmd);
-
-  // Stop the communication
-  daq().asynchStop();
+  daq().asynchWrite(*this, cmd.command.c_str());
 
   // Change the baud
   _baud = baud_rate;
 
-  // Set the asynch communication parameters
-  daq().asynchSet(*this);
-
-  // Start the communication
-  daq().asynchStart();
+  // Change the baud
+  daq().asynchBaud(*this);
 }
 
-// Start the Asynchronous communication
-void AsynchSensor::start()
+// Reset the Asynchronous variables
+void AsynchSensor::reset()
 {
   // Reset the two packets buffer
   for (int i = 0; i < ASYNCH_PACKET_MAX_SIZE; i++) { _last_packet[i] = 0; _current_packet[i] = 0; }
@@ -67,19 +63,6 @@ void AsynchSensor::start()
 
   // Reset the packet id
   _packet_id = 0;
-
-  // Set the Asynch communication for this sensor
-  daq().asynchSet(*this);
-
-  // Start the communication
-  daq().asynchStart();
-}
-
-// Stop the Asynchronous communication
-void AsynchSensor::stop()
-{
-  // Stop the communication
-  daq().asynchStop();
 }
 
 // Start a new packet
@@ -118,7 +101,7 @@ void AsynchSensor::read()
   int byte_read = 0;
 
   // Read the buffer from the device
-  daq().asynchRead(&data[0], byte_read);
+  daq().asynchRead(*this, &data[0], byte_read);
 
   // Go through the read data
   for (int i = 0; i < byte_read; i++)
@@ -161,7 +144,7 @@ void AsynchSensor::read()
 // Write a command to sensor
 void AsynchSensor::write(const CommandPacket& cmd)
 {
-  daq().asynchWrite(cmd);
+  daq().asynchWrite(*this, cmd.command.c_str());
 }
 
 

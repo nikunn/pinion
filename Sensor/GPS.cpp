@@ -1,24 +1,13 @@
 #include "Framework/LuaBind.h"
 #include "Framework/Logger.h"
-#include "Framework/Factory.h"
-#include "Acquisition/Daq.h"
-#include "Acquisition/Wire.h"
 #include "Sensor/GPS.h"
 
 //================================== Adafruit_GPS ==============================
 // Constructor
-Adafruit_GPS::Adafruit_GPS(const LuaTable& cfg)
+Adafruit_GPS::Adafruit_GPS(const LuaTable& cfg) : AsynchSensor(cfg)
 {
   // Get baud
   _baud = cfg.get<uint32_t>("start_baud");
-
-  // Set Data Acquisition device
-  std::string daq_name = cfg.get<std::string>("device");
-  _daq = static_cast<DaqDevice*>(Factory::get(daq_name));
-
-  // Set Wire
-  std::string wire_name = cfg.get<std::string>("wire");
-  _wire = static_cast<AsynchWire*>(Factory::get(wire_name));
 
   // Get rate
   _rate = cfg.get<int>("rate");
@@ -35,6 +24,9 @@ Adafruit_GPS::Adafruit_GPS(const LuaTable& cfg)
   // Begin and end character of all packet
   _begin_char = '$';
   _end_char = '\n';
+
+  // Reset the asynch communication variables
+  reset();
 }
 
 bool Adafruit_GPS::init()
@@ -77,15 +69,12 @@ void Adafruit_GPS::command(const CommandPacket& cmd)
 
   // Send the command to the sensor
   write(cmd);
-
-  // Call the get function as we may received the ack quickly
-  get();
 }
 
 void Adafruit_GPS::onPacket(const std::string& packet)
 {
   // Log the received packet
-  //INFO_PF("%s", packet.c_str());
+  INFO_PF("%s", packet.c_str());
 
   // Check if this is a ack and call onAck
   if (packet.rfind(std::string("PMTK001")) != std::string::npos && packet.length() == GPS_ACK_LEN)
@@ -98,9 +87,11 @@ void Adafruit_GPS::onPacket(const std::string& packet)
     // Parse the new packet
     _gps_parser.parse(packet, _gps_info);
 
+    /*
     INFO_PF("GPS position signal:%u latitude:%f longitude:%f speed:%f direction:%f",
       _gps_info.signal(), _gps_info.latitude(), _gps_info.longitude(),
       _gps_info.speed(), _gps_info.direction());
+    */
   }
 
   // Get the last packet id

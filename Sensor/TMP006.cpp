@@ -1,23 +1,12 @@
 #include<cmath>
 
 #include "Framework/Logger.h"
-#include "Framework/Factory.h"
-#include "Acquisition/Daq.h"
-#include "Acquisition/Wire.h"
 #include "Sensor/TMP006.h"
 
-Adafruit_TMP006::Adafruit_TMP006(const LuaTable& cfg)
+Adafruit_TMP006::Adafruit_TMP006(const LuaTable& cfg) : I2cSensor(cfg)
 {
   // Set the sensor I2C address
   _address = TMP006_I2CADDR;
-
-  // Set Data Acquisition device
-  std::string daq_name = cfg.get<std::string>("device");
-  _daq = static_cast<DaqDevice*>(Factory::get(daq_name));
-
-  // Set Wire
-  std::string wire_name = cfg.get<std::string>("wire");
-  _wire = static_cast<I2cWire*>(Factory::get(wire_name));
 }
 
 

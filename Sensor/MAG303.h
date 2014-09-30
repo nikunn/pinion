@@ -2,7 +2,7 @@
 #ifndef __MAG303_H__
 #define __MAG303_H__
 
-#include "Sensor.h"
+#include "Sensor/Sensor.h"
 
 // This is a Magnetometer
 
@@ -49,7 +49,6 @@ class Adafruit_MAG303 : public I2cSensor
 {
 public:
 
-  //============================ public functions ============================
   Adafruit_MAG303(const LuaTable&);
 
   bool init();
@@ -58,7 +57,6 @@ public:
 
 private:
 
-  //=========================== private members ============================
   MAG303_GAIN _gain;
   float _gauss_lsb_xy;
   float _gauss_lsb_z;

@@ -91,6 +91,9 @@ Accessible* Factory::create(const LuaTable& cfg)
     }
     else
     {
+      // A bit of log
+      INFO_PF("Creating object %s", object_name.c_str());
+
       // Call the creator for this class
       Accessible* object = class_it->second->create(cfg);
 

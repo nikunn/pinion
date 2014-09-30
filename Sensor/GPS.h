@@ -32,7 +32,6 @@ class Adafruit_GPS : public AsynchSensor
 {
 public:
 
-  //============================ public functions ============================
   Adafruit_GPS(const LuaTable&);
 
   void command(const CommandPacket&);
@@ -45,7 +44,6 @@ public:
 
 private:
 
-  //=========================== private members ============================
   int _max_packet_wait;
   std::vector<std::pair<CommandPacket, long> > _command_pending;
 

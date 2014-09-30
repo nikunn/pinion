@@ -2,7 +2,7 @@
 #ifndef __L3GD20_H__
 #define __L3GD20_H__
 
-#include "Sensor.h"
+#include "Sensor/Sensor.h"
 
 // This is a Gyroscope
 
@@ -61,7 +61,6 @@ class Adafruit_L3GD20 : public I2cSensor
 {
 public:
 
-  //============================ public functions ============================
   Adafruit_L3GD20(const LuaTable&);
 
   bool init();
@@ -70,7 +69,6 @@ public:
 
 private:
 
-  //=========================== private members ============================
   SensorVector _data;
   L3GD20_RANGE _range;
 };

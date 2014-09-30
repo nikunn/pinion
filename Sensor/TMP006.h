@@ -2,7 +2,7 @@
 #ifndef _TMP006_H
 #define _TMP006_H
 
-#include "Sensor.h"
+#include "Sensor/Sensor.h"
 
 // This is a infrared temperature sensor
 
@@ -48,7 +48,6 @@ class Adafruit_TMP006 : public I2cSensor
 {
 public:
 
-  //============================ public functions ============================
   Adafruit_TMP006(const LuaTable&);
 
   bool init();
@@ -56,7 +55,6 @@ public:
 
 private:
 
-  //========================== private functions ===========================
   int16_t readRawDieTemperature(void);
   int16_t readRawVoltage(void);
   float readObjTempC(void);

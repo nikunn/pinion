@@ -9,62 +9,42 @@
 #define I2C_RESTART  1<<8    // Repeated start
 #define I2C_READ     2<<8    // Read a byte
 
-// Definition to match easily the LSB of the adress
-#define WRITING 0
-#define READING 1
+// Define reading and writing bit for convenience
+#define I2C_WRITING_BIT 0
+#define I2C_READING_BIT 1
 
-// Length in number of character of the I2C device name
-// Example: "/dev/i2c-1" + the terminating 0
-#define I2C_DEVICE_NAME_LEN 11
-
-// Opens an I2C device. Example of bus number 1 "/dev/i2c-1"
-int I2cLinux::i2cOpen(int bus)
+// Opens an I2C device. Example for bus number 1 "/dev/i2c-1"
+int I2cLinux::i2cOpen(const std::string& device_name)
 {
-  // Define the device name
-  char device_name[I2C_DEVICE_NAME_LEN];
-
-  // Check the bus number
-  if(bus < 0 || bus > 9) { FATAL_PF("I2C Bus number not reconized: %u", bus); }
-
-  // Create the device name from the bus number
-  snprintf(device_name, I2C_DEVICE_NAME_LEN, "/dev/i2c-%u", bus);
-
   // Open connection to device
-  int handle = open(device_name, O_RDWR);
+  int handle = open(device_name.c_str(), O_RDWR);
 
   // Check
   if (handle < 0)
   {
-    FATAL_PF("Could not open connection to I2C device %s", device_name);
+    FATAL_PF("Could not open connection to I2C device %s", device_name.c_str());
   }
 
-  // Check the I2C functionality of this device
-  i2cCheck(handle, device_name);
-
-  // Return the handle
-  return handle;
-}
-
-void I2cLinux::i2cCheck(int handle, char* device_name)
-{
   // Define variable for check
   unsigned long funcs;
 
   // Perform check of I2C functionality
   if(ioctl(handle, I2C_FUNCS, &funcs) < 0)
   {
-    FATAL_PF("Could not perform I2C check on device %s", device_name);
+    FATAL_PF("Could not perform I2C check on device %s", device_name.c_str());
   }
 
   // Abort if device does not have I2C functionality
   if (!(funcs & I2C_FUNC_I2C))
   {
-    FATAL_PF("I2C device %s does not have I2C functionality", device_name);
+    FATAL_PF("I2C device %s does not have I2C functionality", device_name.c_str());
   }
+  // Return the handle
+  return handle;
 }
 
 // Close an I2C device
-void I2cLinux::i2cClose(int handle)
+void I2cLinux::i2cClose(const int handle)
 {
   // Open connection to device
   int err = close(handle);
@@ -79,8 +59,8 @@ int I2cLinux::i2cRead(const int handle, const byte address, const byte regis,
                       byte* data, const int bytes_num)
 {
   // Create slave adress adding read/write bit from sensor 7bit address
-  byte addr_read = (address << 1) | 1;
-  byte addr_write = (address << 1) & ~1;
+  byte addr_read = (address << 1) | I2C_READING_BIT;
+  byte addr_write = (address << 1) & ~I2C_READING_BIT;
 
   // Define the sequence length
   int sequence_len = bytes_num + 4;
@@ -148,7 +128,7 @@ int I2cLinux::i2cWrite(const int handle, const byte address, const byte regis,
 
 // Count the number of segments in an I2C sequence before allocating the message buffer
 // There is an upper limit on the number of segments (restarts): no more than 42.
-int I2cLinux::countSegments(uint16_t *sequence, int sequence_len)
+int I2cLinux::countSegments(const uint16_t *sequence, const int sequence_len)
 {
   // Initialize counter, there is always at least one segment
   int segments_num = 1;
@@ -166,7 +146,7 @@ int I2cLinux::countSegments(uint16_t *sequence, int sequence_len)
 
 // Sends a command/data sequence that can include restarts, writes and reads.
 // Note that the sequence is composed of uint16_t, not byte.
-int I2cLinux::sendSequence(int handle, uint16_t* sequence, int sequence_len, byte* rcv_data)
+int I2cLinux::sendSequence(const int handle, const uint16_t* sequence, const int sequence_len, byte* rcv_data)
 {
   // Initialize the message sequence
   i2c_rdwr_ioctl_data message_seq;
@@ -214,7 +194,7 @@ int I2cLinux::sendSequence(int handle, uint16_t* sequence, int sequence_len, byt
     if(sequence[i] != I2C_RESTART)
     {
       // If we are writing, the only thing in the sequence are bytes to be written
-      if(rw == WRITING) { *msg_cur_buf_ptr++ = (byte)(sequence[i]); }
+      if(rw == I2C_WRITING_BIT) { *msg_cur_buf_ptr++ = (byte)(sequence[i]); }
 
       // For reads, there is nothing to be done.
       msg_cur_buf_size++;
@@ -236,7 +216,7 @@ int I2cLinux::sendSequence(int handle, uint16_t* sequence, int sequence_len, byt
       current_message++;
 
       // If this is a read, increment
-      if(rw == READING) { rcv_data += msg_cur_buf_size; }
+      if(rw == I2C_READING_BIT) { rcv_data += msg_cur_buf_size; }
 
       // Check if there is more transaction
       if(i < sequence_len - 2)

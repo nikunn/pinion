@@ -61,18 +61,11 @@ public :
 
 public :
 
-  //============================ public functions ============================
-  // Default Constructor Destructor
-  Sensor() {};
-  ~Sensor() {};
+  Sensor(const LuaTable&);
 
   DaqDevice& daq() const { return *_daq; }
 
-protected :
-
-  //========================== protected functions ===========================
-  static int16_t int8To16(byte*);
-  static int16_t int8To16(byte, byte);
+private :
 
   DaqDevice* _daq;
 };
@@ -83,18 +76,18 @@ class I2cSensor : public Sensor
 {
 public :
 
-  //============================ public functions ============================
+  I2cSensor(const LuaTable&);
+
   const I2cWire* wire() const { return _wire; }
   byte address() const { return _address; }
 
-  void set();
   void read(const byte regis, byte* data, const int bytes_num = 1);
   void write(const byte regis, byte* data, const int bytes_num = 1);
 
 protected :
-
-  //========================== protected members ===========================
   byte _address;
+
+private :
   I2cWire* _wire;
 };
 
@@ -115,17 +108,17 @@ struct CommandPacket
 class AsynchSensor : public Sensor
 {
 public :
-  //============================ public functions ============================
+
+  AsynchSensor(const LuaTable&);
 
           //======================= Accessor =====================
   long baud() const { return _baud; }
-  void setBaud(const CommandPacket& cmd, const uint32_t baud);
+  void setBaud(const CommandPacket& cmd, const long baud);
 
   const AsynchWire* wire() const { return _wire; }
 
           //==================== Communication ===================
-  void start();
-  void stop();
+  void reset();
 
   void read();
   void write(const CommandPacket&);
@@ -137,9 +130,7 @@ public :
 
 protected :
 
-  //========================== protected members ===========================
-
-  uint32_t _baud;
+  long _baud;
 
   char _begin_char;
   char _stop_char;
@@ -151,6 +142,7 @@ protected :
   char _current_packet[ASYNCH_PACKET_MAX_SIZE];
   char* _current_char;
 
+private :
   AsynchWire* _wire;
 };
 

@@ -1,23 +1,12 @@
 #include "Framework/LuaBind.h"
 #include "Framework/Logger.h"
-#include "Framework/Factory.h"
-#include "Acquisition/Daq.h"
-#include "Acquisition/Wire.h"
 #include "Sensor/MAG303.h"
 
 // Instantiates a new Adafruit_MAG303 class
-Adafruit_MAG303::Adafruit_MAG303(const LuaTable& cfg)
+Adafruit_MAG303::Adafruit_MAG303(const LuaTable& cfg) : I2cSensor(cfg)
 {
   // Set the sensor I2C address
   _address = MAG303_I2CADDR;
-
-  // Set Data Acquisition device
-  std::string daq_name = cfg.get<std::string>("device");
-  _daq = static_cast<DaqDevice*>(Factory::get(daq_name));
-
-  // Set Wire
-  std::string wire_name = cfg.get<std::string>("wire");
-  _wire = static_cast<I2cWire*>(Factory::get(wire_name));
 
   // Get the sensor gain
   float gain = cfg.get<float>("gain");

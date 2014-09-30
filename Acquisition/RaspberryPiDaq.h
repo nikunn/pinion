@@ -7,6 +7,8 @@
 //=========================== Forward Declarations =============================
 
 class I2cWire;
+class AsynchWire;
+class I2cSensor;
 class AsynchSensor;
 
 //================================ RaspberryPiDaq =================================
@@ -18,20 +20,22 @@ public :  //======================== Public ======================
   ~RaspberryPiDaq();
 
           //======================== Device ======================
-  void open();
-  void close();
-  void info();
+  void deviceOpen();
+  void deviceClose();
+  void deviceInfo();
 
           //================= I2C Communication ==================
+  int i2cOpen(const I2cWire&);
+  void i2cClose(const I2cWire&);
   void i2cRead(const I2cSensor&, const byte regis, byte* data, const int bytes_num = 1);
   void i2cWrite(const I2cSensor&, const byte regis, const byte* data, const int bytes_num = 1);
 
           //================= Asynch Communication ===============
-  void asynchStart();
-  void asynchStop();
-  void asynchSet(const AsynchSensor&);
-  void asynchRead(byte* data, int& bytes_num);
-  void asynchWrite(const CommandPacket&);
+  int asynchOpen(const AsynchWire&);
+  void asynchClose(const AsynchWire&);
+  void asynchBaud(const AsynchSensor&);
+  void asynchRead(const AsynchSensor&, byte* data, int& bytes_num);
+  void asynchWrite(const AsynchSensor&, const std::string&);
 };
 
 

@@ -1,24 +1,13 @@
 #include "Framework/LuaBind.h"
 #include "Framework/Logger.h"
-#include "Framework/Factory.h"
-#include "Acquisition/Daq.h"
-#include "Acquisition/Wire.h"
 #include "Sensor/L3GD20.h"
 
 //================================ Adafruit_L3GD20 =============================
 // Instantiates a new Adafruit_L3GD20 class
-Adafruit_L3GD20::Adafruit_L3GD20(const LuaTable& cfg)
+Adafruit_L3GD20::Adafruit_L3GD20(const LuaTable& cfg) : I2cSensor(cfg)
 {
   // Set the sensor I2C address
   _address = L3GD20_I2CADDR;
-
-  // Set Data Acquisition device
-  std::string daq_name = cfg.get<std::string>("device");
-  _daq = static_cast<DaqDevice*>(Factory::get(daq_name));
-
-  // Set Wire
-  std::string wire_name = cfg.get<std::string>("wire");
-  _wire = static_cast<I2cWire*>(Factory::get(wire_name));
 
   // Get the sensor range
   int range = cfg.get<int>("range");

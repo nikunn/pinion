@@ -2,7 +2,7 @@
 #ifndef __LSM303_H__
 #define __LSM303_H__
 
-#include "Sensor.h"
+#include "Sensor/Sensor.h"
 
 // This is an Accelerometer
 
@@ -49,14 +49,12 @@ class Adafruit_LSM303 : public I2cSensor
 {
 public:
 
-  //============================ public functions ============================
   Adafruit_LSM303(const LuaTable&);
   bool init();
   void get();
 
 private:
 
-  //=========================== private members ============================
   // Last read accelerometer data
   SensorVector _data;
 

@@ -1,19 +1,15 @@
 #!/usr/bin/lua
 
+-- Definiton of data acquisition device
+local daq_device = "LBJ"
+
 ----------------------------------- Universe -----------------------------------
 -- List of all object to be created, in this order
 Universe =
 {
-  -- List of data acquisition devices
+  -- Data acquisition device
   {
-    -- LabJack Device
-    --"LBJ",
-
-    -- Raspberry Device
-    "RPI",
-
-    -- BeagleBone Device
-    --"BBB",
+    daq_device,
   },
 
   -- List of wires connecting the sensors
@@ -62,6 +58,9 @@ Catalog =
   {
     name="AsynchWire",
     class="AsynchWire",
+    daq = daq_device,
+    device = "/dev/i2c-1",
+    default_baud=9600,
     transmit_line = 1,
     receive_line = 0,
   },
@@ -70,7 +69,8 @@ Catalog =
   {
     name="I2cWire",
     class="I2cWire",
-    bus = 1,
+    daq = daq_device,
+    device = "/dev/i2c-1",
     data_line = 2,
     clock_line = 3,
   },
@@ -78,9 +78,9 @@ Catalog =
     -------------------------------- Sensors -------------------------------
   GPS =
   {
-    device = "RPI",
     name="GPS",
     class="GPS",
+    daq = daq_device,
     wire="AsynchWire",
     start_baud=9600,
     rate=10, -- in Hz, (1/5/10)
@@ -88,27 +88,27 @@ Catalog =
 
   Accel =
   {
-    device = "RPI",
     name="Accel",
     class="LSM303",
+    daq = daq_device,
     wire="I2cWire",
     gravity_axis="Z",
   },
 
   Magneto =
   {
-    device = "RPI",
     name="Magneto",
     class="MAG303",
+    daq = daq_device,
     wire="I2cWire",
     gain=1.3, -- in something, (1.3/1.9/2.5/4.0/4.7/5.6/8.1)
   },
 
   Gyro =
   {
-    device = "RPI",
     name="Gyro",
     class="L3GD20",
+    daq = daq_device,
     wire="I2cWire",
     range=250, -- in degree per second, (250/500/2000)
   },

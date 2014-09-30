@@ -4,16 +4,28 @@
 #include "Framework/Accessible.h"
 #include "Framework/LuaBind.h"
 
+//=========================== Forward Declarations =============================
+
+class DaqDevice;
+
+
 //=================================== Wire =====================================
 class Wire : public Accessible
 {
-public:
+public :
+  Wire(const LuaTable&);
 
   int handle() const { return _handle; }
 
-protected:
+  DaqDevice& daq() const { return *_daq; }
+  std::string device() const { return _device; }
 
+protected :
   int _handle;
+
+private :
+  DaqDevice* _daq;
+  std::string _device;
 };
 
 
@@ -21,19 +33,15 @@ protected:
 class I2cWire : public Wire
 {
 public :
-  I2cWire(const LuaTable& cfg);
+  I2cWire(const LuaTable&);
   ~I2cWire();
 
-  int handle() const { return _handle; }
   int dataLine() const { return _data_line; }
   int clockLine() const { return _clock_line; }
 
 private :
   int _data_line;
   int _clock_line;
-
-  int _handle;
-  int _bus;
 };
 
 
@@ -41,7 +49,7 @@ private :
 class SpiWire : public Wire
 {
 public :
-  SpiWire(const LuaTable& cfg);
+  SpiWire(const LuaTable&);
 
   int clockLine() const { return _clock_line; }
   int mosiLine() const { return _mosi_line; }
@@ -60,14 +68,19 @@ private :
 class AsynchWire : public Wire
 {
 public :
-  AsynchWire(const LuaTable& cfg);
+  AsynchWire(const LuaTable&);
+  ~AsynchWire();
 
   int transmitLine() const { return _transmit_line; }
   int receiveLine() const { return _receive_line; }
 
+  long defaultBaud() const { return _default_baud; }
+
 private :
   int _transmit_line;
   int _receive_line;
+
+  long _default_baud;
 };
 
 

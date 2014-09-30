@@ -15,32 +15,45 @@ RaspberryPiDaq::~RaspberryPiDaq()
 {
 };
 
-// Open connection to labjack
-void RaspberryPiDaq::open()
+// Open device
+void RaspberryPiDaq::deviceOpen()
 {
 }
 
-// Close connection to labjack
-void RaspberryPiDaq::close()
+// Close device
+void RaspberryPiDaq::deviceClose()
 {
 }
 
-// Print some informations about this labjack device
-void RaspberryPiDaq::info()
+// Print some informations about this device
+void RaspberryPiDaq::deviceInfo()
 {
 }
 
 //=============================== I2C Communication ============================
+// Open I2C device
+int RaspberryPiDaq::i2cOpen(const I2cWire& wire)
+{
+  return I2cLinux::i2cOpen(wire.device());
+}
+
+// Close I2C device
+void RaspberryPiDaq::i2cClose(const I2cWire& wire)
+{
+  I2cLinux::i2cClose(wire.handle());
+}
 
 // Read data in I2C
-void RaspberryPiDaq::i2cRead(const I2cSensor& sensor, const byte regis, byte* data, const int bytes_num)
+void RaspberryPiDaq::i2cRead(const I2cSensor& sensor, const byte regis,
+                             byte* data, const int bytes_num)
 {
   // Execute the I2C communication
   int result = I2cLinux::i2cRead(sensor.wire()->handle(), sensor.address(), regis, data, bytes_num);
 }
 
 // Write data in I2C
-void RaspberryPiDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const byte* data, const int bytes_num)
+void RaspberryPiDaq::i2cWrite(const I2cSensor& sensor, const byte regis,
+                              const byte* data, const int bytes_num)
 {
   // Execute the I2C communication
   int result = I2cLinux::i2cWrite(sensor.wire()->handle(), sensor.address(), regis, data, bytes_num);
@@ -49,27 +62,32 @@ void RaspberryPiDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const b
 
 //============================== Asynch Communication ==========================
 
-// Initialize the Asynch communication for this sensor
-void RaspberryPiDaq::asynchSet(const AsynchSensor& sensor)
+// Open serial device in asynch mode
+int RaspberryPiDaq::asynchOpen(const AsynchWire& wire)
+{
+  return 0;
+}
+
+// Close asynch device
+void RaspberryPiDaq::asynchClose(const AsynchWire& wire)
 {
 }
 
-// Turn on Asynch. Configures timing hardware, DIO lines and allocates the receiving buffer
-void RaspberryPiDaq::asynchStart()
+// Change the baud of asynch device
+void RaspberryPiDaq::asynchBaud(const AsynchSensor& sensor)
 {
 }
 
-// Turn off asynch
-void RaspberryPiDaq::asynchStop()
+// Read data from serial
+void RaspberryPiDaq::asynchRead(const AsynchSensor& sensor, byte* data, int& bytes_num)
 {
 }
 
-// Read data in asynch
-void RaspberryPiDaq::asynchRead(byte* data, int& bytes_read)
+// Write data to serial
+void RaspberryPiDaq::asynchWrite(const AsynchSensor& sensor, const std::string&)
 {
 }
 
-// Write data to asynch
-void RaspberryPiDaq::asynchWrite(const CommandPacket& cmd)
-{
-}
+
+
+

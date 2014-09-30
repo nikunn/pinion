@@ -9,6 +9,10 @@
 // Constructor
 LabJackDaq::LabJackDaq(const LuaTable&)
 {
+  // Open the device
+  deviceOpen();
+
+  // Initialize the last used I2C wire to null
   _i2c_wire = NULL;
 };
 
@@ -16,11 +20,11 @@ LabJackDaq::LabJackDaq(const LuaTable&)
 LabJackDaq::~LabJackDaq()
 {
   // Close the lab jack device
-  close();
+  deviceClose();
 };
 
 // Open connection to labjack
-void LabJackDaq::open()
+void LabJackDaq::deviceOpen()
 {
   // Define Error.
   int err;
@@ -31,7 +35,7 @@ void LabJackDaq::open()
 }
 
 // Close connection to labjack
-void LabJackDaq::close()
+void LabJackDaq::deviceClose()
 {
   // Define Error.
   int err;
@@ -42,7 +46,7 @@ void LabJackDaq::close()
 }
 
 // Print some informations about this labjack device
-void LabJackDaq::info()
+void LabJackDaq::deviceInfo()
 {
 
   int err;
@@ -95,21 +99,18 @@ void LabJackDaq::errorCheck(int err, const char * formattedDescription)
 
 //=============================== I2c Communication ============================
 
-// Initialize the I2C communication for this sensor (has to be done for each sensor each use).
-void LabJackDaq::i2cSet(const I2cSensor& sensor)
+// Initialize the I2C communication for this wire (has to be done each time we change wire).
+int LabJackDaq::i2cOpen(const I2cWire& wire)
 {
-  // Get the wire for this sensor
-  const I2cWire* wire = static_cast<const I2cWire*>(sensor.wire());
-
   // Define some variable
   int err;
 
   // Check if we need to set the I2C configuration for this wire
-  if (_i2c_wire != wire)
+  if (_i2c_wire != &wire)
   {
     // Get the I2C wire line
-    int data_line = wire->dataLine();
-    int clock_line = wire->clockLine();
+    int data_line = wire.dataLine();
+    int clock_line = wire.clockLine();
 
     // Configure the I2C data line, SDA pin number
     err = LJM_eWriteName(handle(), "I2C_SDA_DIONUM", data_line);
@@ -124,9 +125,24 @@ void LabJackDaq::i2cSet(const I2cSensor& sensor)
     errorCheck(err, "LJM_eWriteName (I2C_SPEED_THROTTLE)");
 
     // A bit of log
-    INFO_PF("Setting LabJack:%u I2C with data:%u clock:%u",
-      handle(), data_line, clock_line);
+    INFO_PF("Setting LabJack:%u I2C with data:%u clock:%u", handle(), data_line, clock_line);
+
+    // Set the I2C wire
+    _i2c_wire = &wire;
   }
+
+  // Return a dummy handle
+  return 0;
+}
+
+// Set I2C parameters before communication
+void LabJackDaq::i2cSet(const I2cSensor& sensor)
+{
+  // Define some variable
+  int err;
+
+  // Make sure we are connected to the correct wire
+  i2cOpen(*sensor.wire());
 
   // Options bits:
   // bit0: Reset the I2C bus.
@@ -136,15 +152,17 @@ void LabJackDaq::i2cSet(const I2cSensor& sensor)
   // Configure the I2C address of Slave
   err = LJM_eWriteName(handle(), "I2C_SLAVE_ADDRESS", sensor.address());
   errorCheck(err, "LJM_eWriteName (I2C_SLAVE_ADDRESS)");
+}
 
-  // Set the I2C wire
-  _i2c_wire = wire;
+// Close the I2C communication
+void LabJackDaq::i2cClose(const I2cWire&)
+{
 }
 
 // Read data in I2C
 void LabJackDaq::i2cRead(const I2cSensor& sensor, const byte regis, byte* data, const int bytes_num)
 {
-  // Set the configuration for communicating with this sensor
+  // Set the LabJack configuration for communicating with this sensor
   i2cSet(sensor);
 
   // Define some variable
@@ -162,7 +180,7 @@ void LabJackDaq::i2cRead(const I2cSensor& sensor, const byte regis, byte* data, 
   // Set the adress to read, from the memory pointer
   double regis_array[1];
   regis_array[0] = (double)regis;
-  
+
   // Prepare the communication to write the address we will read from
   err = LJM_eWriteNameArray(handle(), "I2C_WRITE_DATA", 1, regis_array, &errorAddress);
   errorCheck(err, "LJM_eNames (I2C_WRITE_DATA)");
@@ -188,7 +206,7 @@ void LabJackDaq::i2cRead(const I2cSensor& sensor, const byte regis, byte* data, 
 // Write data in I2C
 void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const byte* data, const int bytes_num_ex)
 {
-  // Set the configuration for communicating with this sensor
+  // Set the LabJack configuration for communicating with this sensor
   i2cSet(sensor);
 
   // Write EEPROM bytes in the user memory area, using the page write technique. Note
@@ -197,7 +215,7 @@ void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const byte*
   // two bytes because byte 16 is the start of a new page.
 
   // We need to put the register we are going to write to at the begining of the data
-  bytes_num = bytes_num_ex + 1;
+  int bytes_num = bytes_num_ex + 1;
 
   // Initialize some variables
   int err, i;
@@ -213,7 +231,7 @@ void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const byte*
 
   // TX/RX bytes will go here
   double data_tx[LABJACK_I2C_PACKET_SIZE];
-  
+
   // Set the adress to write to, the memory pointer, first thing to write
   data_tx[0] = (double)regis;
 
@@ -232,21 +250,21 @@ void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const byte*
 
 //============================== Asynch Communication ==========================
 
-// Initialize the Asynch communication for this sensor
-void LabJackDaq::asynchSet(const AsynchSensor& sensor)
+// Turn on Asynch. Configures timing hardware, DIO lines and allocates the receiving buffer
+int LabJackDaq::asynchOpen(const AsynchWire& wire)
 {
-  // Get the Asynch wire for this sensor
-  const AsynchWire* wire = sensor.wire();
+  // To avoid errors we close it first
+  asynchClose(wire);
 
   // Define some variable
   int err;
 
   // Configure the asynch receiving line
-  err = LJM_eWriteName(handle(), "ASYNCH_TX_DIONUM", wire->transmitLine());
+  err = LJM_eWriteName(handle(), "ASYNCH_TX_DIONUM", wire.transmitLine());
   errorCheck(err, "LJM_eWriteName (ASYNCH_TX_DIONUM)");
 
   // Configure the asynch transmitting line
-  err = LJM_eWriteName(handle(), "ASYNCH_RX_DIONUM", wire->receiveLine());
+  err = LJM_eWriteName(handle(), "ASYNCH_RX_DIONUM", wire.receiveLine());
   errorCheck(err, "LJM_eWriteName (ASYNCH_RX_DIONUM)");
 
   // Configure the number of data bits
@@ -258,23 +276,19 @@ void LabJackDaq::asynchSet(const AsynchSensor& sensor)
   errorCheck(err, "LJM_eWriteName (ASYNCH_RX_BUFFER_SIZE_BYTES)");
 
   // Configure the baud rate
-  err = LJM_eWriteName(handle(), "ASYNCH_BAUD", sensor.baud());
+  err = LJM_eWriteName(handle(), "ASYNCH_BAUD", wire.defaultBaud());
   errorCheck(err, "LJM_eWriteName (ASYNCH_BAUD)");
-}
-
-// Turn on Asynch. Configures timing hardware, DIO lines and allocates the receiving buffer
-void LabJackDaq::asynchStart()
-{
-  // Define some variable
-  int err;
 
   // Enable Asynch communication
   err = LJM_eWriteName(handle(), "ASYNCH_ENABLE", 1);
   errorCheck(err, "LJM_eWriteName (ASYNCH_ENABLE)");
+
+  // Return a dummy handle
+  return 0;
 }
 
 // Turn off asynch
-void LabJackDaq::asynchStop()
+void LabJackDaq::asynchClose(const AsynchWire&)
 {
   // Define some variable
   int err;
@@ -284,8 +298,27 @@ void LabJackDaq::asynchStop()
   errorCheck(err, "LJM_eWriteName (ASYNCH_ENABLE)");
 }
 
+// Change the baud rate
+void LabJackDaq::asynchBaud(const AsynchSensor& sensor)
+{
+  // Define some variable
+  int err;
+
+  // Disable Asynch communication
+  err = LJM_eWriteName(handle(), "ASYNCH_ENABLE", 0);
+  errorCheck(err, "LJM_eWriteName (ASYNCH_ENABLE)");
+
+  // Configure the baud rate
+  err = LJM_eWriteName(handle(), "ASYNCH_BAUD", sensor.baud());
+  errorCheck(err, "LJM_eWriteName (ASYNCH_BAUD)");
+
+  // Enable Asynch communication
+  err = LJM_eWriteName(handle(), "ASYNCH_ENABLE", 1);
+  errorCheck(err, "LJM_eWriteName (ASYNCH_ENABLE)");
+}
+
 // Read data in asynch
-void LabJackDaq::asynchRead(byte* data, int& bytes_read)
+void LabJackDaq::asynchRead(const AsynchSensor&, byte* data, int& bytes_read)
 {
   // Initialize the number of byte read to 0
   bytes_read = 0;
@@ -355,27 +388,24 @@ void LabJackDaq::asynchRead(byte* data, int& bytes_read)
 }
 
 // Write data to asynch
-void LabJackDaq::asynchWrite(const CommandPacket& cmd)
+void LabJackDaq::asynchWrite(const AsynchSensor&, const std::string& cmd)
 {
-  // Get the string to pass to the sensor
-  const std::string& cmd_str = cmd.command;
-
   // Some log
-  DEBUG_PF("command: %s\n", cmd_str.c_str());
+  DEBUG_PF("command: %s\n", cmd.c_str());
 
   // Define some variable
   int err, i;
   int errorAddress = LABJACK_INIT_ERR_ADDR;
 
   // Set the number of bytes to transmit
-  err = LJM_eWriteName(handle(), "ASYNCH_NUM_BYTES_TX", cmd_str.size());
+  err = LJM_eWriteName(handle(), "ASYNCH_NUM_BYTES_TX", cmd.size());
   errorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BYTES_TX)");
 
   // TX bytes will go here
   double data_tx[LABJACK_USB_PACKET_SIZE];
 
   // Initalize the number of bytes to write and already written
-  int bytes_command = cmd_str.size();
+  int bytes_command = cmd.size();
   int bytes_written = 0;
 
   // Loop to write the data in the device
@@ -388,7 +418,7 @@ void LabJackDaq::asynchWrite(const CommandPacket& cmd)
     for (i = 0; i < bytes_towrite; i++)
     {
       // Input the current char as double in the array to write
-      data_tx[i] = (double) ((cmd_str.c_str())[bytes_written + i]);
+      data_tx[i] = (double) ((cmd.c_str())[bytes_written + i]);
     }
 
     // Write the data to device
