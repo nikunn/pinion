@@ -66,12 +66,13 @@ void RaspberryPiDaq::i2cWrite(const I2cSensor& sensor, const byte regis,
 // Open serial device in asynch mode
 int RaspberryPiDaq::asynchOpen(const AsynchWire& wire)
 {
-  return 0;
+  return AsynchLinux::asynchOpen(wire.device(), wire.defaultBaud());
 }
 
 // Close asynch device
 void RaspberryPiDaq::asynchClose(const AsynchWire& wire)
 {
+  AsynchLinux::asynchClose(wire.handle());
 }
 
 // Change the baud of asynch device
@@ -88,7 +89,3 @@ void RaspberryPiDaq::asynchRead(const AsynchSensor& sensor, byte* data, int& byt
 void RaspberryPiDaq::asynchWrite(const AsynchSensor& sensor, const std::string&)
 {
 }
-
-
-
-

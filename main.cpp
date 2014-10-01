@@ -61,8 +61,9 @@ int main()
 
   //Adafruit_LSM303* accel = static_cast<Adafruit_LSM303*>(Factory::get("Accel"));
   //Adafruit_MAG303* magneto = static_cast<Adafruit_MAG303*>(Factory::get("Magneto"));
-  Adafruit_L3GD20* gyro = static_cast<Adafruit_L3GD20*>(Factory::get("Gyro"));
+  //Adafruit_L3GD20* gyro = static_cast<Adafruit_L3GD20*>(Factory::get("Gyro"));
 
+  /*
   if (gyro->init())
   {
     INFO_LG("Gyro init ok");
@@ -78,14 +79,12 @@ int main()
     }
   }
   else { INFO_LG("Gyro init failed"); }
+  */
 
-  /*
   Adafruit_GPS* gps = static_cast<Adafruit_GPS*>(Factory::get("GPS"));
-  if (gps->init()) { INFO_LG("GPS init ok"); }
   while (true)
   {
-    gps->get();
-    usleep(1000);
+    usleep(10000);
   }
-  */
+  //if (gps->init()) { INFO_LG("GPS init ok"); }
 }

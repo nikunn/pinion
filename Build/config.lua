@@ -1,7 +1,7 @@
 #!/usr/bin/lua
 
 -- Definiton of data acquisition device
-local daq_device = "LBJ"
+local daq_device = "RPI"
 
 ----------------------------------- Universe -----------------------------------
 -- List of all object to be created, in this order
@@ -59,7 +59,7 @@ Catalog =
     name="AsynchWire",
     class="AsynchWire",
     daq = daq_device,
-    device = "/dev/i2c-1",
+    device = "/dev/ttyAMA0",
     default_baud=9600,
     transmit_line = 1,
     receive_line = 0,

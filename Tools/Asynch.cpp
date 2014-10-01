@@ -22,6 +22,9 @@ int AsynchLinux::handle = 0;
 // Opens the given serial device in asynchronous mode
 int AsynchLinux::asynchOpen(const std::string& device_name, const long baud)
 {
+  // Some logs
+  INFO_PF("Opening serial device %s in asynch mode", device_name.c_str());
+
   // Define the connection option
   termios config;
 
@@ -65,7 +68,7 @@ int AsynchLinux::asynchOpen(const std::string& device_name, const long baud)
 
   // Set port settings for canonical input processing
   config.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
-  config.c_iflag = IGNPAR | ICRNL;
+  config.c_iflag = IGNPAR | ICRNL | IGNCR;
   config.c_oflag = 0;
   config.c_lflag = ICANON;
   config.c_cc[VMIN]=1;
@@ -140,11 +143,18 @@ void AsynchLinux::onCallback(int status)
   // Read the serial buffer
   int result = read(AsynchLinux::handle, buff, LINUX_ASYNCH_PACKET_SIZE);
 
-  // Override the last character to null
-  buff[result]=0;
+  if (result > 3)
+  {
+    // Override the last character to null
+    buff[result-2]=0;
 
-  // Print the buffer
-  INFO_PF("Asynch buffer:%s num:%u\n", buff, result);
+    // Print the buffer
+    INFO_PF("Asynch num:%u buffer:%s", result, buff);
+  }
+  else
+  {
+    INFO_LG("Incomplete packet");
+  }
 }
 
 // Function returning the number of byte in the serial buffer
