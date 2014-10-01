@@ -1,10 +1,11 @@
 #include "Framework/Logger.h"
 #include "Tools/I2C.h"
+#include "Tools/Asynch.h"
 #include "Acquisition/RaspberryPiDaq.h"
 #include "Acquisition/Wire.h"
 #include "Sensor/Sensor.h"
 
-//=============================== RaspberryPiDaq ================================
+//============================== RaspberryPiDaq ================================
 // Constructor
 RaspberryPiDaq::RaspberryPiDaq(const LuaTable&)
 {

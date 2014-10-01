@@ -5,20 +5,28 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <sys/signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
 
 #include "Framework/Logger.h"
 #include "Tools/Asynch.h"
 
+// Posix compliant source
+#define _POSIX_SOURCE 1
+
+// Initialize the handle
+int AsynchLinux::handle = 0;
+
+//================================ AsynchLinux =================================
+// Opens the given serial device in asynchronous mode
 int AsynchLinux::asynchOpen(const std::string& device_name, const long baud)
 {
   // Define the connection option
   termios config;
 
   // Open the serial device
-  int handle = open(device_name.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+  int handle = open(device_name.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
 
   // Check the result
   if(handle < 0)
@@ -32,44 +40,38 @@ int AsynchLinux::asynchOpen(const std::string& device_name, const long baud)
     FATAL_PF("Device %s is not a serial device", device_name.c_str());
   }
 
+  // Definition of signal action
+  struct sigaction saio;
+
+  // Configure the signal handler before making the device asynchronous
+  saio.sa_handler = AsynchLinux::onCallback;
+  sigemptyset(&(saio.sa_mask));
+  saio.sa_flags = 0;
+  saio.sa_restorer = NULL;
+  sigaction(SIGIO, &saio, NULL);
+
+  // Allow the process to receive SIGIO
+  fcntl(handle, F_SETOWN, getpid());
+
+  // Make the file descriptor asynchronous (the manual page says only
+  // O_APPEND and O_NONBLOCK, will work with F_SETFL...)
+  fcntl(handle, F_SETFL, FASYNC);
+
   // Get the configuration
   if(tcgetattr(handle, &config) < 0)
   {
     FATAL_PF("Could not get the serial configuration for device %s", device_name.c_str());
   }
 
-  // Input flags - Turn off input processing
-  // convert break to null byte, no CR to NL translation,
-  // no NL to CR translation, don't mark parity errors or breaks
-  // no input parity check, don't strip high bit off,
-  // no XON/XOFF software flow control
-  config.c_iflag &= ~(IGNBRK | BRKINT | ICRNL | INLCR | PARMRK | INPCK | ISTRIP | IXON);
+  // Set port settings for canonical input processing
+  config.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
+  config.c_iflag = IGNPAR | ICRNL;
+  config.c_oflag = 0;
+  config.c_lflag = ICANON;
+  config.c_cc[VMIN]=1;
+  config.c_cc[VTIME]=0;
 
-  // Output flags - Turn off output processing
-  // no CR to NL translation, no NL to CR-NL translation,
-  // no NL to CR translation, no column 0 CR suppression,
-  // no Ctrl-D suppression, no fill characters, no case mapping,
-  // no local output processing
-  // config.c_oflag &= ~(OCRNL | ONLCR | ONLRET |
-  //                     ONOCR | ONOEOT| OFILL | OLCUC | OPOST);
-  config.c_oflag &= ~OPOST ;
-
-  // No line processing:
-  // echo off, echo newline off, canonical mode off, 
-  // extended input processing off, signal chars off
-  config.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG);
-
-  // Turn off character processing
-  // clear current char size mask, no parity checking, one stop bit
-  // no output processing, force 8 bit input
-  config.c_cflag &= ~(CSIZE | PARENB | CSTOPB);
-  config.c_cflag |= CS8;
-
-  // One input byte is enough to return from read()
-  // Inter-character timer off
-  config.c_cc[VMIN]  = 0;
-  config.c_cc[VTIME] = 0;
-
+  // Define the baud speed
   speed_t baud_speed;
 
   switch (baud)
@@ -103,11 +105,17 @@ int AsynchLinux::asynchOpen(const std::string& device_name, const long baud)
     FATAL_PF("Could not set the serial baud rate for device %s", device_name.c_str());
   }
 
+  // Flush
+  tcflush(handle, TCIFLUSH);
+
   // Finally, apply the configuration
-  if(tcsetattr(handle, TCSAFLUSH, &config) < 0)
+  if(tcsetattr(handle, TCSANOW, &config) < 0)
   {
     FATAL_PF("Could not set the serial configuration for device %s", device_name.c_str());
   }
+
+  // Put the static handle
+  AsynchLinux::handle = handle;
 
   // Return the handle
   return handle;
@@ -123,12 +131,29 @@ void AsynchLinux::asynchClose(const int handle)
   if (err < 0) { ERROR_PF("Could not close connection to serial device on handle %u", handle); }
 }
 
-int bytesAvailable(const int handle)
+// Function called when we received a new packet
+void AsynchLinux::onCallback(int status)
+{
+  // Define the buffer we will read data to
+  char buff[LINUX_ASYNCH_PACKET_SIZE];
+
+  // Read the serial buffer
+  int result = read(AsynchLinux::handle, buff, LINUX_ASYNCH_PACKET_SIZE);
+
+  // Override the last character to null
+  buff[result]=0;
+
+  // Print the buffer
+  INFO_PF("Asynch buffer:%s num:%u\n", buff, result);
+}
+
+// Function returning the number of byte in the serial buffer
+int AsynchLinux::bytesAvailable(const int handle)
 {
   // Inititialize the number of available bytes
   int result;
 
-  // Request 
+  // Request the number of bytes ready
   int err = ioctl(handle, FIONREAD, &result);
 
   // Check for errors
