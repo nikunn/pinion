@@ -75,32 +75,7 @@ int AsynchLinux::asynchOpen(const std::string& device_name, const long baud)
   config.c_cc[VTIME]=0;
 
   // Define the baud speed
-  speed_t baud_speed;
-
-  switch (baud)
-  {
-    case     50: baud_speed =     B50 ; break ;
-    case     75: baud_speed =     B75 ; break ;
-    case    110: baud_speed =    B110 ; break ;
-    case    134: baud_speed =    B134 ; break ;
-    case    150: baud_speed =    B150 ; break ;
-    case    200: baud_speed =    B200 ; break ;
-    case    300: baud_speed =    B300 ; break ;
-    case    600: baud_speed =    B600 ; break ;
-    case   1200: baud_speed =   B1200 ; break ;
-    case   1800: baud_speed =   B1800 ; break ;
-    case   2400: baud_speed =   B2400 ; break ;
-    case   4800: baud_speed =   B4800 ; break ;
-    case   9600: baud_speed =   B9600 ; break ;
-    case  19200: baud_speed =  B19200 ; break ;
-    case  38400: baud_speed =  B38400 ; break ;
-    case  57600: baud_speed =  B57600 ; break ;
-    case 115200: baud_speed = B115200 ; break ;
-    case 230400: baud_speed = B230400 ; break ;
-
-    default:
-      FATAL_PF("The serial baud rate is not compatible for device %s", device_name.c_str());
-  }
+  speed_t baud_speed = longToBaud(baud);
 
   // Baud rate
   if(cfsetispeed(&config, baud_speed) < 0 || cfsetospeed(&config, baud_speed) < 0)
@@ -154,6 +129,35 @@ void AsynchLinux::onCallback(int status)
   else
   {
     INFO_LG("Incomplete packet");
+  }
+}
+
+// Get the baud rate in termios format from long
+speed_t AsynchLinux::longToBaud(const long baud)
+{
+  switch (baud)
+  {
+    case     50: return     B50 ; break ;
+    case     75: return     B75 ; break ;
+    case    110: return    B110 ; break ;
+    case    134: return    B134 ; break ;
+    case    150: return    B150 ; break ;
+    case    200: return    B200 ; break ;
+    case    300: return    B300 ; break ;
+    case    600: return    B600 ; break ;
+    case   1200: return   B1200 ; break ;
+    case   1800: return   B1800 ; break ;
+    case   2400: return   B2400 ; break ;
+    case   4800: return   B4800 ; break ;
+    case   9600: return   B9600 ; break ;
+    case  19200: return  B19200 ; break ;
+    case  38400: return  B38400 ; break ;
+    case  57600: return  B57600 ; break ;
+    case 115200: return B115200 ; break ;
+    case 230400: return B230400 ; break ;
+
+    default:
+      FATAL_PF("The serial baud rate %u is not compatible", baud);
   }
 }
 
