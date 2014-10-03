@@ -79,8 +79,9 @@ AsynchWire::AsynchWire(const LuaTable& cfg) : Wire(cfg)
   _handle = daq().asynchOpen(*this);
 
   // A bit of log
-  INFO_PF("Created Asynch wire \"%s\", transmit:%u receive:%u device:%s",
-    cfg.get<std::string>("name").c_str(), _transmit_line, _receive_line, device().c_str());
+  INFO_PF("Created Asynch wire \"%s\", transmit:%u receive:%u device:%s handle:%u",
+    cfg.get<std::string>("name").c_str(), _transmit_line, _receive_line,
+    device().c_str(), _handle);
 }
 
 // Destructor

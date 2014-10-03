@@ -12,9 +12,6 @@
 #include "Framework/Logger.h"
 #include "Tools/Asynch.h"
 
-// Posix compliant source
-#define _POSIX_SOURCE 1
-
 // Initialize the handle
 int AsynchLinux::handle = 0;
 
@@ -47,18 +44,38 @@ int AsynchLinux::asynchOpen(const std::string& device_name, const long baud)
   struct sigaction saio;
 
   // Configure the signal handler before making the device asynchronous
-  saio.sa_handler = AsynchLinux::onCallback;
+  saio.sa_sigaction = AsynchLinux::onCallback;
   sigemptyset(&(saio.sa_mask));
   saio.sa_flags = 0;
   saio.sa_restorer = NULL;
-  sigaction(SIGIO, &saio, NULL);
 
-  // Allow the process to receive SIGIO
-  fcntl(handle, F_SETOWN, getpid());
+  // Tells Sigaction to add sig_info_t *info and void *context to the callback signature
+  saio.sa_flags = SA_SIGINFO;
+
+  // Call to sigaction to allow the callback on IO signal
+  if(sigaction(SIGIO, &saio, NULL) < 0)
+  {
+    FATAL_PF("Could not register action to %s IO signals", device_name.c_str());
+  }
+
+  // Allow the process to receive SIGIO (socket owner)
+  if(fcntl(handle, F_SETOWN, getpid()) < 0)
+  {
+    FATAL_PF("Could not make process be socket owner for %s IO signals", device_name.c_str());
+  }
+
+  // Make Linux populate si_fd and si_band in the siginfo struct
+  if(fcntl(handle, F_SETSIG, SIGIO) < 0)
+  {
+    FATAL_PF("Could not make the device %s ", device_name.c_str());
+  }
 
   // Make the file descriptor asynchronous (the manual page says only
   // O_APPEND and O_NONBLOCK, will work with F_SETFL...)
-  fcntl(handle, F_SETFL, FASYNC);
+  if(fcntl(handle, F_SETFL, FASYNC) < 0)
+  {
+    FATAL_PF("Could not make the device %s handle asynchronous", device_name.c_str());
+  }
 
   // Get the configuration
   if(tcgetattr(handle, &config) < 0)
@@ -110,7 +127,7 @@ void AsynchLinux::asynchClose(const int handle)
 }
 
 // Function called when we received a new packet
-void AsynchLinux::onCallback(int status)
+void AsynchLinux::onCallback(int signo, siginfo_t* info, void*)
 {
   // Define the buffer we will read data to
   char buff[LINUX_ASYNCH_PACKET_SIZE];
@@ -124,7 +141,7 @@ void AsynchLinux::onCallback(int status)
     buff[result-2]=0;
 
     // Print the buffer
-    INFO_PF("Asynch num:%u buffer:%s", result, buff);
+    INFO_PF("Asynch handle:%u buffer:%s", info->si_fd, buff);
   }
   else
   {
