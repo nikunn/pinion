@@ -3,6 +3,8 @@
 
 #include "Framework/Accessible.h"
 #include "Framework/LuaBind.h"
+#include "Tools/I2C.h"
+#include "Tools/Uart.h"
 
 //=========================== Forward Declarations =============================
 
@@ -18,7 +20,7 @@ public :
   int handle() const { return _handle; }
 
   DaqDevice& daq() const { return *_daq; }
-  std::string device() const { return _device; }
+  const std::string& device() const { return _device; }
 
 protected :
   int _handle;
@@ -64,19 +66,21 @@ private :
 };
 
 
-//================================ AsynchWire ==================================
-class AsynchWire : public Wire
+//================================= UartWire ===================================
+class UartWire : public Wire
 {
 public :
-  AsynchWire(const LuaTable&);
-  ~AsynchWire();
+  UartWire(const LuaTable&);
+  ~UartWire();
 
   int transmitLine() const { return _transmit_line; }
   int receiveLine() const { return _receive_line; }
 
+  UartCom::Type comType() const { return _com_type; }
   long defaultBaud() const { return _default_baud; }
 
 private :
+  UartCom::Type _com_type;
   int _transmit_line;
   int _receive_line;
 

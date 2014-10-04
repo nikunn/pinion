@@ -1,6 +1,6 @@
 #include "Framework/Logger.h"
 #include "Tools/I2C.h"
-#include "Tools/Asynch.h"
+#include "Tools/Uart.h"
 #include "Acquisition/RaspberryPiDaq.h"
 #include "Acquisition/Wire.h"
 #include "Sensor/Sensor.h"
@@ -61,31 +61,32 @@ void RaspberryPiDaq::i2cWrite(const I2cSensor& sensor, const byte regis,
 }
 
 
-//============================== Asynch Communication ==========================
-
-// Open serial device in asynch mode
-int RaspberryPiDaq::asynchOpen(const AsynchWire& wire)
+//=============================== UART Communication ===========================
+// Open UART device
+int RaspberryPiDaq::uartOpen(const UartWire& wire)
 {
-  return AsynchLinux::asynchOpen(wire.device(), wire.defaultBaud());
+  return UartLinux::uartOpen(wire.device(), wire.defaultBaud(), wire.comType());
 }
 
-// Close asynch device
-void RaspberryPiDaq::asynchClose(const AsynchWire& wire)
+// Close UART device
+void RaspberryPiDaq::uartClose(const UartWire& wire)
 {
-  AsynchLinux::asynchClose(wire.handle());
+  UartLinux::uartClose(wire.handle());
 }
 
-// Change the baud of asynch device
-void RaspberryPiDaq::asynchBaud(const AsynchSensor& sensor)
+// Change the baud of UART device
+void RaspberryPiDaq::changeBaud(const UartSensor& sensor)
 {
+  UartLinux::changeBaud(sensor.wire()->handle(), sensor.baud());
 }
 
 // Read data from serial
-void RaspberryPiDaq::asynchRead(const AsynchSensor& sensor, byte* data, int& bytes_num)
+void RaspberryPiDaq::uartRead(const UartSensor& sensor, byte* data, int& bytes_num)
 {
 }
 
 // Write data to serial
-void RaspberryPiDaq::asynchWrite(const AsynchSensor& sensor, const std::string&)
+void RaspberryPiDaq::uartWrite(const UartSensor& sensor, const UartPacket& packet)
 {
+  UartLinux::uartWrite(sensor.wire()->handle(), packet);
 }

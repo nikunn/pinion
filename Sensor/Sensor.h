@@ -3,18 +3,16 @@
 
 #define GRAVITY 9.80665F
 
-#define ASYNCH_PACKET_MAX_SIZE 255
-#define ASYNCH_BUFFER_SIZE 2048
-
 
 #include "Framework/Types.h"
 #include "Framework/Factory.h"
+#include "Tools/Uart.h"
 
 
 //=========================== Forward Declarations =============================
 
 class I2cWire;
-class AsynchWire;
+class UartWire;
 class DaqDevice;
 
 
@@ -31,7 +29,7 @@ public :
     AXIS_X,
     AXIS_Y,
     AXIS_Z,
-  }; 
+  };
 
   //============================== SensorVector ==============================
   // Struct contaning 3 dimensional vector
@@ -59,13 +57,12 @@ public :
     float heading;
   };
 
-public :
+public :  //======================== Public ======================
 
   Sensor(const LuaTable&);
-
   DaqDevice& daq() const { return *_daq; }
 
-private :
+private : //======================= Private ======================
 
   DaqDevice* _daq;
 };
@@ -74,61 +71,68 @@ private :
 //=================================== I2cSensor ================================
 class I2cSensor : public Sensor
 {
-public :
+public :  //======================== Public ======================
 
   I2cSensor(const LuaTable&);
 
+  const byte address() const { return _address; }
   const I2cWire* wire() const { return _wire; }
-  byte address() const { return _address; }
 
   void read(const byte regis, byte* data, const int bytes_num = 1);
   void write(const byte regis, byte* data, const int bytes_num = 1);
 
-protected :
+protected : //===================== Protected ====================
+
   byte _address;
 
-private :
+private : //======================= Private ======================
+
   I2cWire* _wire;
 };
 
 
-//============================== CommandPacket =============================
-struct CommandPacket
+//=================================== UartSensor ===============================
+class UartSensor : public Sensor
 {
-  int id;
-  std::string command;
+public :  //======================== Public ======================
 
-  // Default constructor
-  CommandPacket() {};
-  CommandPacket(const char* cmd, int no) : command(cmd), id(no) {};
-};
-
-
-//================================== AsynchSensor ==============================
-class AsynchSensor : public Sensor
-{
-public :
-
-  AsynchSensor(const LuaTable&);
+  UartSensor(const LuaTable&);
 
           //======================= Accessor =====================
   long baud() const { return _baud; }
-  void setBaud(const CommandPacket& cmd, const long baud);
+  void changeBaud(const UartPacket& cmd, const long baud);
 
-  const AsynchWire* wire() const { return _wire; }
+  const UartWire* wire() const { return _wire; }
+
+          //==================== Communication ===================
+  void write(const UartPacket&);
+  virtual void read() {};
+
+protected : //===================== Protected ====================
+
+  long _baud;
+
+private : //======================= Private ======================
+  UartWire* _wire;
+};
+
+
+//================================== SerialSensor ==============================
+class SerialSensor : public UartSensor
+{
+public :  //======================== Public ======================
+
+  SerialSensor(const LuaTable&);
 
           //==================== Communication ===================
   void reset();
-
   void read();
-  void write(const CommandPacket&);
 
   void startPacket();
   void endPacket();
-  long packetId() { return _packet_id; }
-  virtual void onPacket(const std::string& packet) = 0;
+  virtual void onPacket(const UartPacket&) = 0;
 
-protected :
+protected : //===================== Protected ====================
 
   long _baud;
 
@@ -136,14 +140,18 @@ protected :
   char _stop_char;
   char _end_char;
 
-  long _packet_id;
-
-  char _last_packet[ASYNCH_PACKET_MAX_SIZE];
-  char _current_packet[ASYNCH_PACKET_MAX_SIZE];
+  char _last_packet[UART_PACKET_SIZE];
+  char _current_packet[UART_PACKET_SIZE];
   char* _current_char;
+};
 
-private :
-  AsynchWire* _wire;
+
+//================================== AsynchSensor ==============================
+class AsynchSensor : public UartSensor, public AsynchListener
+{
+public :  //======================== Public ======================
+
+  AsynchSensor(const LuaTable&);
 };
 
 

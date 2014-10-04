@@ -11,6 +11,7 @@ Sensor::Sensor(const LuaTable& cfg)
   _daq = static_cast<DaqDevice*>(Factory::get(daq_name));
 }
 
+
 //=================================== I2cSensor ================================
 I2cSensor::I2cSensor(const LuaTable& cfg) : Sensor(cfg)
 {
@@ -31,77 +32,86 @@ void I2cSensor::write(const byte regis, byte* data, const int bytes_num)
   daq().i2cWrite(*this, regis, data, bytes_num);
 }
 
-//================================== AsynchSensor ==============================
-AsynchSensor::AsynchSensor(const LuaTable& cfg) : Sensor(cfg)
+
+//=================================== UartSensor ===============================
+UartSensor::UartSensor(const LuaTable& cfg) : Sensor(cfg)
 {
   // Set Wire
   std::string wire_name = cfg.get<std::string>("wire");
-  _wire = static_cast<AsynchWire*>(Factory::get(wire_name));
+  _wire = static_cast<UartWire*>(Factory::get(wire_name));
 }
 
-// Set Baud rate
-void AsynchSensor::setBaud(const CommandPacket& cmd, const long baud_rate)
+// Change Baud rate
+void UartSensor::changeBaud(const UartPacket& cmd, const long baud)
 {
-  // Send the command to change the baud to the sensor
-  daq().asynchWrite(*this, cmd.command.c_str());
+  // Send the message to change the baud to the sensor
+  daq().uartWrite(*this, cmd.message.c_str());
 
   // Change the baud
-  _baud = baud_rate;
+  _baud = baud;
 
   // Change the baud
-  daq().asynchBaud(*this);
+  daq().changeBaud(*this);
 }
 
-// Reset the Asynchronous variables
-void AsynchSensor::reset()
+// Write a message to sensor
+void UartSensor::write(const UartPacket& pkt)
+{
+  daq().uartWrite(*this, pkt.message.c_str());
+}
+
+
+//================================== SerialSensor ==============================
+SerialSensor::SerialSensor(const LuaTable& cfg) : UartSensor(cfg)
+{
+  // Reset the serial communication variables
+  reset();
+}
+
+// Reset the uart variables
+void SerialSensor::reset()
 {
   // Reset the two packets buffer
-  for (int i = 0; i < ASYNCH_PACKET_MAX_SIZE; i++) { _last_packet[i] = 0; _current_packet[i] = 0; }
+  for (int i = 0; i < UART_PACKET_SIZE; i++) { _last_packet[i] = 0; _current_packet[i] = 0; }
 
   // Reset the pointer of current char
   _current_char = &_current_packet[0];
-
-  // Reset the packet id
-  _packet_id = 0;
 }
 
 // Start a new packet
-void AsynchSensor::startPacket()
+void SerialSensor::startPacket()
 {
   // Reset the buffer
-  for (int i = 0; i < ASYNCH_PACKET_MAX_SIZE; i++) { _current_packet[i] = 0; }
+  for (int i = 0; i < UART_PACKET_SIZE; i++) { _current_packet[i] = 0; }
 
   // Point the current character to the begininng of the buffer
   _current_char = &_current_packet[0];
 }
 
 // End of packet jobs
-void AsynchSensor::endPacket()
+void SerialSensor::endPacket()
 {
   // Move the current packet the the last packet
-  for (int i = 0; i < ASYNCH_PACKET_MAX_SIZE; i++)
+  for (int i = 0; i < UART_PACKET_SIZE; i++)
   {
     _last_packet[i] = _current_packet[i];
   }
 
-  // Update the packet id
-  _packet_id++;
-
   // Call the sensor as new packet is ready
-  onPacket(std::string(_last_packet));
+  onPacket(UartPacket(_last_packet));
 }
 
 // Read the device buffer
-void AsynchSensor::read()
+void SerialSensor::read()
 {
   // Allocate a read buffer
-  byte data[ASYNCH_BUFFER_SIZE];
+  byte data[UART_BUFFER_SIZE];
 
   // Initailize the number of byte read
   int byte_read = 0;
 
   // Read the buffer from the device
-  daq().asynchRead(*this, &data[0], byte_read);
+  daq().uartRead(*this, &data[0], byte_read);
 
   // Go through the read data
   for (int i = 0; i < byte_read; i++)
@@ -125,10 +135,10 @@ void AsynchSensor::read()
     }
 
     // Check that the buffer is not full
-    if (std::greater<char*>()(_current_char, 
-          &_current_packet[0] + sizeof(char*) * (ASYNCH_PACKET_MAX_SIZE - 1)))
+    if (std::greater<char*>()(_current_char,
+          &_current_packet[0] + sizeof(char*) * (UART_PACKET_SIZE - 1)))
     {
-      ERROR_LG("Asynch sensor over the limit of the packet size buffer");
+      ERROR_LG("Serial sensor over the limit of the packet size buffer");
     }
     else
     {
@@ -141,12 +151,9 @@ void AsynchSensor::read()
   }
 }
 
-// Write a command to sensor
-void AsynchSensor::write(const CommandPacket& cmd)
-{
-  daq().asynchWrite(*this, cmd.command.c_str());
-}
 
-
+//================================== AsynchSensor ==============================
+//Constructor
+AsynchSensor::AsynchSensor(const LuaTable& cfg) : UartSensor(cfg) {}
 
 

@@ -29,7 +29,7 @@ int main()
   #elif defined __DEVICE_BBB__
   Factory::registerClass("BeagleBone", new CreatorType<BeagleBoneDaq>);
   #endif
-  Factory::registerClass("AsynchWire", new CreatorType<AsynchWire>);
+  Factory::registerClass("UartWire", new CreatorType<UartWire>);
   Factory::registerClass("I2cWire", new CreatorType<I2cWire>);
   Factory::registerClass("GPS", new CreatorType<Adafruit_GPS>);
   Factory::registerClass("LSM303", new CreatorType<Adafruit_LSM303>);
@@ -52,7 +52,7 @@ int main()
   Universe::createUniverse(lua_state);
 
   #if defined __DEVICE_LAB__
-  LabJackDaq* daq = static_cast<LabJackDaq*>(Factory::get("LBJ"));
+  LabJackDaq* daq = static_cast<LabJackDaq*>(Factory::get("LAB"));
   #elif defined __DEVICE_RPI__
   RaspberryPiDaq* daq = static_cast<RaspberryPiDaq*>(Factory::get("RPI"));
   #elif defined __DEVICE_BBB__
@@ -82,6 +82,7 @@ int main()
   */
 
   Adafruit_GPS* gps = static_cast<Adafruit_GPS*>(Factory::get("GPS"));
+  // gps->init();
   while (true)
   {
     usleep(10000);

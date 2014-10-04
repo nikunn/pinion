@@ -3,8 +3,9 @@
 
 #include<vector>
 
-#include "Sensor/Sensor.h"
 #include "Tools/Nmea.h"
+#include "Tools/Uart.h"
+#include "Sensor/Sensor.h"
 
 // Update rate command
 #define GPS_PMTK_UPDATE_1HZ  "$PMTK220,1000*1F\r\n"
@@ -34,18 +35,14 @@ public:
 
   Adafruit_GPS(const LuaTable&);
 
-  void command(const CommandPacket&);
   bool init();
-  void get();
 
-  void onPacket(const std::string& packet);
-  void onAck(const std::string& packet);
-  void onNonAck(const CommandPacket& cmd);
+  void onEvent(const UartPacket&);
+
+  bool isAck(const UartPacket&);
+  void onAck(const UartPacket&);
 
 private:
-
-  int _max_packet_wait;
-  std::vector<std::pair<CommandPacket, long> > _command_pending;
 
   int _rate;
 

@@ -2,8 +2,6 @@
 #include "Framework/Factory.h"
 #include "Acquisition/Daq.h"
 #include "Acquisition/Wire.h"
-#include "Tools/I2C.h"
-#include "Tools/Asynch.h"
 
 //=================================== Wire =====================================
 Wire::Wire(const LuaTable& cfg)
@@ -63,8 +61,8 @@ SpiWire::SpiWire(const LuaTable& cfg) : Wire(cfg)
 }
 
 
-//================================ AsynchWire ==================================
-AsynchWire::AsynchWire(const LuaTable& cfg) : Wire(cfg)
+//================================= UartWire ===================================
+UartWire::UartWire(const LuaTable& cfg) : Wire(cfg)
 {
   // Set the transmit line
   _transmit_line = cfg.get<int>("transmit_line");
@@ -75,19 +73,25 @@ AsynchWire::AsynchWire(const LuaTable& cfg) : Wire(cfg)
   // Get the default baud
   _default_baud = cfg.get<long>("default_baud");
 
+  // Get the communication type
+  std::string com_type_str = cfg.get<std::string>("com_type");
+
+  // Parse the communication type
+  _com_type = UartCom::parse(com_type_str);
+
   // Open the connection to this serial device
-  _handle = daq().asynchOpen(*this);
+  _handle = daq().uartOpen(*this);
 
   // A bit of log
-  INFO_PF("Created Asynch wire \"%s\", transmit:%u receive:%u device:%s handle:%u",
+  INFO_PF("Created UART wire \"%s\", transmit:%u receive:%u device:%s handle:%u",
     cfg.get<std::string>("name").c_str(), _transmit_line, _receive_line,
     device().c_str(), _handle);
 }
 
 // Destructor
-AsynchWire::~AsynchWire()
+UartWire::~UartWire()
 {
   // Close connection to I2C bus
-  daq().asynchClose(*this);
+  daq().uartClose(*this);
 }
 

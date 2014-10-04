@@ -248,13 +248,13 @@ void LabJackDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const byte*
 }
 
 
-//============================== Asynch Communication ==========================
+//=============================== UART Communication ===========================
 
 // Turn on Asynch. Configures timing hardware, DIO lines and allocates the receiving buffer
-int LabJackDaq::asynchOpen(const AsynchWire& wire)
+int LabJackDaq::uartOpen(const UartWire& wire)
 {
   // To avoid errors we close it first
-  asynchClose(wire);
+  uartClose(wire);
 
   // Define some variable
   int err;
@@ -272,7 +272,7 @@ int LabJackDaq::asynchOpen(const AsynchWire& wire)
   errorCheck(err, "LJM_eWriteName (ASYNCH_NUM_BITS)");
 
   // Configure the receiving buffer size
-  err = LJM_eWriteName(handle(), "ASYNCH_RX_BUFFER_SIZE_BYTES", ASYNCH_BUFFER_SIZE);
+  err = LJM_eWriteName(handle(), "ASYNCH_RX_BUFFER_SIZE_BYTES", UART_BUFFER_SIZE);
   errorCheck(err, "LJM_eWriteName (ASYNCH_RX_BUFFER_SIZE_BYTES)");
 
   // Configure the baud rate
@@ -287,8 +287,8 @@ int LabJackDaq::asynchOpen(const AsynchWire& wire)
   return 0;
 }
 
-// Turn off asynch
-void LabJackDaq::asynchClose(const AsynchWire&)
+// Turn off LabJack uart
+void LabJackDaq::uartClose(const UartWire&)
 {
   // Define some variable
   int err;
@@ -299,7 +299,7 @@ void LabJackDaq::asynchClose(const AsynchWire&)
 }
 
 // Change the baud rate
-void LabJackDaq::asynchBaud(const AsynchSensor& sensor)
+void LabJackDaq::changeBaud(const UartSensor& sensor)
 {
   // Define some variable
   int err;
@@ -318,7 +318,7 @@ void LabJackDaq::asynchBaud(const AsynchSensor& sensor)
 }
 
 // Read data in asynch
-void LabJackDaq::asynchRead(const AsynchSensor&, byte* data, int& bytes_read)
+void LabJackDaq::uartRead(const UartSensor&, byte* data, int& bytes_read)
 {
   // Initialize the number of byte read to 0
   bytes_read = 0;
@@ -361,7 +361,7 @@ void LabJackDaq::asynchRead(const AsynchSensor&, byte* data, int& bytes_read)
     errorCheck(err, "LJM_eNames (ASYNCH_READ_DATA)");
 
     // Check we are not exceeding the buffer size
-    if (bytes_read + bytes_num >= ASYNCH_BUFFER_SIZE)
+    if (bytes_read + bytes_num >= UART_BUFFER_SIZE)
     {
       // Print an error log
       ERROR_LG("LabJack Asynch data is exceeding the buffer");
@@ -387,9 +387,12 @@ void LabJackDaq::asynchRead(const AsynchSensor&, byte* data, int& bytes_read)
   }
 }
 
-// Write data to asynch
-void LabJackDaq::asynchWrite(const AsynchSensor&, const std::string& cmd)
+// Write data to uart
+void LabJackDaq::uartWrite(const UartSensor&, const UartPacket& packet)
 {
+  // Get the command from the packet
+  const std::string& cmd = packet.message;
+
   // Some log
   DEBUG_PF("command: %s\n", cmd.c_str());
 

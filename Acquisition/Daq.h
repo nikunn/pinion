@@ -9,9 +9,10 @@
 //=========================== Forward Declarations =============================
 
 class I2cWire;
-class AsynchWire;
+class UartWire;
 class I2cSensor;
-class AsynchSensor;
+class UartSensor;
+class UartPacket;
 
 
 //================================= DaqDevice ==================================
@@ -31,13 +32,12 @@ public :  //======================== Public ======================
   virtual void i2cRead(const I2cSensor&, const byte regis, byte* data, const int bytes_num = 1) = 0;
   virtual void i2cWrite(const I2cSensor&, const byte regis, const byte* data, const int bytes_num = 1) = 0;
 
-          //================= Asynch Communication ===============
-  virtual int asynchOpen(const AsynchWire&) = 0;
-  virtual void asynchClose(const AsynchWire&) = 0;
-
-  virtual void asynchBaud(const AsynchSensor&) = 0;
-  virtual void asynchRead(const AsynchSensor&, byte* data, int& bytes_num) = 0;
-  virtual void asynchWrite(const AsynchSensor&, const std::string&) = 0;
+          //================== Uart Communication ================
+  virtual int uartOpen(const UartWire&) = 0;
+  virtual void uartClose(const UartWire&) = 0;
+  virtual void changeBaud(const UartSensor&) = 0;
+  virtual void uartWrite(const UartSensor&, const UartPacket&) = 0;
+  virtual void uartRead(const UartSensor&, byte* data, int& bytes_num) = 0;
 };
 
 
