@@ -137,6 +137,9 @@ void UartLinux::asynchConfig(const int handle)
 // Change the baud rate of a serial device
 void UartLinux::changeBaud(const int handle, const long baud)
 {
+  // A bit of log
+  INFO_PF("Changing to baud %u for the UART on handle %u", baud, handle );
+
   // Define the UART option
   termios config;
 
@@ -162,6 +165,9 @@ void UartLinux::changeBaud(const int handle, const long baud)
 // Close a UART device
 void UartLinux::uartClose(const int handle)
 {
+  // A bit of log
+  INFO_PF("Closing UART connection on handle %u", handle );
+
   // Close the connection to the given handle
   if (close(handle) < 0)
   {
@@ -170,8 +176,13 @@ void UartLinux::uartClose(const int handle)
 }
 
 // Write to UART
-void UartLinux::uartWrite(const int handle, const UartPacket&)
+void UartLinux::uartWrite(const int handle, const UartPacket& packet)
 {
+  // Get the packet content
+  const std::string& message = packet.message;
+
+  // Write the packet content to the UART
+  int bytes_write = write(handle, message.c_str(), message.length());
 }
 
 // Read from UART
@@ -191,8 +202,18 @@ void UartLinux::onEvent(int signo, siginfo_t* info, void*)
   // Read the buffer
   int bytes_read = read(handle, buff, UART_PACKET_SIZE);
 
-  // Print the buffer
-  INFO_PF("Asynch handle:%u buffer:%s", handle, buff);
+  // Check the number of bytes read
+  if (bytes_read < 0 || bytes_read > UART_PACKET_SIZE)
+  {
+    // Print an error log
+    ERROR_PF("Could not read UART buffer on handle %u", handle);
+
+    // Exit the function
+    return;
+  }
+
+  // Make the buffer null terminated
+  buff[bytes_read]=0;
 
   // Get the packetId
   long id = 0;//getPacketId(handle);

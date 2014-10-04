@@ -41,12 +41,12 @@ public :  //======================== Public ======================
     }
   }
 
-  static void registerListener(int channel, const Listener<EVT>* listener)
+  static void registerListener(int channel, Listener<EVT>* listener)
   {
     // Register this listener for this channel
     if (!isRegistered(channel, listener))
     {
-      getListenerTable().insert(std::make_pair<int, Listener<EVT>* >(channel, listener));
+      getListenerTable().insert(std::pair<int, Listener<EVT>* >(channel, listener));
     }
   }
 

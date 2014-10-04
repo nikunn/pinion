@@ -15,18 +15,17 @@ Adafruit_GPS::Adafruit_GPS(const LuaTable& cfg) : AsynchSensor(cfg)
   // Check that the rate value is known
   if (_rate != 1 && _rate != 5 && _rate != 10)
   {
-    FATAL_PF("GPS Cannot parse the rate:%u (1/5/10)", _rate);
+    FATAL_PF("GPS: Cannot parse the rate:%u (1/5/10)", _rate);
   }
 }
 
 bool Adafruit_GPS::init()
 {
+  // A bit of log
+  INFO_LG("GPS: Initializing");
+
   // Define a Command packet we will use later
   UartPacket cmd;
-
-  // Change the baud rate to 57600
-  cmd = UartPacket(GPS_PMTK_BAUD_57600, 251);
-  changeBaud(cmd, 57600);
 
   // Change the output to contain some NMEA sentence type
   cmd = UartPacket(GPS_PMTK_OUTPUT_RMC, 314);
@@ -48,6 +47,11 @@ bool Adafruit_GPS::init()
   // Send the command to change the output rate
   write(cmd);
 
+  // Change the baud rate to 57600
+  INFO_LG("GPS: Changing the baud rate");
+  cmd = UartPacket(GPS_PMTK_BAUD_57600, 251);
+  //changeBaud(cmd, 57600);
+
   // Initialization went fine
   return true;
 }
@@ -59,7 +63,7 @@ void Adafruit_GPS::onEvent(const UartPacket& packet)
   const std::string& message = packet.message;
 
   // Log the received message
-  INFO_PF("%s", message.c_str());
+  INFO_PF("GPS onEvent: %s", message.c_str());
 
   // Check if this is a ack and call onAck
   if (isAck(packet))

@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "Framework/Logger.h"
 #include "Acquisition/Daq.h"
 #include "Acquisition/Wire.h"
@@ -154,6 +156,13 @@ void SerialSensor::read()
 
 //================================== AsynchSensor ==============================
 //Constructor
-AsynchSensor::AsynchSensor(const LuaTable& cfg) : UartSensor(cfg) {}
+AsynchSensor::AsynchSensor(const LuaTable& cfg) : UartSensor(cfg)
+{
+  // Get the handle
+  int handle = wire()->handle();
+
+  // Register to this handle
+  AsynchDispatcher::registerListener(handle, static_cast<AsynchListener*>(this));
+}
 
 

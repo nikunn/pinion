@@ -82,10 +82,10 @@ int main()
   */
 
   Adafruit_GPS* gps = static_cast<Adafruit_GPS*>(Factory::get("GPS"));
-  // gps->init();
+  gps->init();
   while (true)
   {
-    usleep(10000);
+    usleep(1000000);
   }
   //if (gps->init()) { INFO_LG("GPS init ok"); }
 }
