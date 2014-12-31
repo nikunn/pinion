@@ -80,7 +80,7 @@ void UartLinux::asynchConfig(const int handle)
   struct sigaction saio;
 
   // Configure the signal handler before making the device asynchronous
-  saio.sa_sigaction = UartLinux::onEvent;
+  saio.sa_sigaction = onEvent;
   sigemptyset(&(saio.sa_mask));
   saio.sa_flags = 0;
   saio.sa_restorer = NULL;

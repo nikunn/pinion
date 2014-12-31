@@ -27,10 +27,10 @@ int main()
   #endif
   Factory::registerClass("UartWire", new CreatorType<UartWire>);
   Factory::registerClass("I2cWire", new CreatorType<I2cWire>);
-  Factory::registerClass("GPS", new CreatorType<Adafruit_GPS>);
-  Factory::registerClass("LSM303", new CreatorType<Adafruit_LSM303>);
-  Factory::registerClass("MAG303", new CreatorType<Adafruit_MAG303>);
-  Factory::registerClass("L3GD20", new CreatorType<Adafruit_L3GD20>);
+  Factory::registerClass("GPS", new CreatorType<GpsFGP>);
+  Factory::registerClass("LSM303", new CreatorType<AccelLSM303>);
+  Factory::registerClass("MAG303", new CreatorType<MagnetoMAG303>);
+  Factory::registerClass("L3GD20", new CreatorType<GyroL3GD20>);
 
   // Read the configuration file
   LuaScript script("config.lua");
@@ -54,9 +54,9 @@ int main()
   #endif
 
   /*
-  //Adafruit_LSM303* accel = static_cast<Adafruit_LSM303*>(Factory::get("Accel"));
-  //Adafruit_MAG303* magneto = static_cast<Adafruit_MAG303*>(Factory::get("Magneto"));
-  Adafruit_L3GD20* gyro = static_cast<Adafruit_L3GD20*>(Factory::get("Gyro"));
+  //AccelLSM303* accel = static_cast<AccelLSM303*>(Factory::get("Accel"));
+  //MagnetoMAG303* magneto = static_cast<MagnetoMAG303*>(Factory::get("Magneto"));
+  GyroL3GD20* gyro = static_cast<GyroL3GD20*>(Factory::get("Gyro"));
 
   if (gyro->init())
   {
@@ -75,7 +75,7 @@ int main()
   else { INFO_LG("Gyro init failed"); }
   */
 
-  Adafruit_GPS* gps = static_cast<Adafruit_GPS*>(Factory::get("GPS"));
+  GpsFGP* gps = static_cast<GpsFGP*>(Factory::get("GPS"));
   //gps->init();
   while (true)
   {

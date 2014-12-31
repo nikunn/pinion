@@ -1,6 +1,4 @@
-#include "Sensor/TMP006.h"
-#include "Sensor/LSM303.h"
-#include "Sensor/MAG303.h"
-#include "Sensor/L3GD20.h"
-#include "Sensor/GPS.h"
-
+#include "Sensor/AccelLSM303.h"
+#include "Sensor/MagnetoMAG303.h"
+#include "Sensor/GyroL3GD20.h"
+#include "Sensor/GpsFGP.h"
