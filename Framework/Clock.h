@@ -5,114 +5,46 @@
 #include <ctime>
 #include <chrono>
 
-// Useful Macro to benchmark a scope
-//=============================================================================\'
-#define BENCH_SCOPE(name)                                                      \
-  static Benchmark bench(name);                                                \
-  StopWatch sw(&bench);                                                        \
-//=============================================================================\'
-
-
 // Some useful typedef
 typedef std::chrono::seconds Seconds;
 typedef std::chrono::milliseconds MilliSeconds;
 typedef std::chrono::microseconds MicroSeconds;
+typedef std::chrono::nanoseconds NanoSeconds;
 
 
 //=================================== Clock ====================================
 // Clock class
-template<typename CLOCK>
-class ClockType
+template <typename CLOCK, typename TYPE = long>
+class ClockGen
 {
 public:
 
   //================================ Typedefs ================================
-  typedef std::chrono::time_point<CLOCK> TimePoint;
+  using Duration = typename CLOCK::duration;
+  using TimePoint = typename CLOCK::time_point;
 
 public:
 
   //============================ public functions ============================
   // Get the current time
-  static TimePoint Now() { return CLOCK::now(); }
-};
+  static TimePoint now() { return CLOCK::now(); }
+  static double resolution() { return (double) CLOCK::period::num / CLOCK::period::den; }
 
-// Define the default Clock for us
-typedef ClockType<std::chrono::high_resolution_clock> Clock;
+  //================================= TimeSpan ===================================
 
-// Define the timepoint class based on this clock
-typedef Clock::TimePoint TimePoint;
+  // Timespan is a wrapper of chrono duration
+  class TimeSpan : public Duration
+  {
+  public:
 
+    //============================ public functions ============================
+    template<typename T>
+    TimeSpan(T&& val) : Duration(std::forward<T>(val)) {};
 
-//================================= TimeSpan ===================================
-
-// Define a time type
-typedef float TimeType;
-
-// Use the chrono duration
-typedef std::chrono::duration<TimeType> Duration;
-
-// Timespan is a wrapper of chrono duration
-class TimeSpan : public Duration
-{
-public: 
-
-  //============================ public functions ============================
-  template<typename T>
-  TimeSpan(T&& val) : Duration(std::forward<T>(val)) {};
-
-  // Function to convert a timespan in a chosen unit (sec ms us...)
-  template <typename UNIT>  // SALE
-  TimeType as() { return std::chrono::duration_cast<UNIT>(Duration(this->count())).count(); }
-};
-
-
-//================================= Benchmark ==================================
-
-class Benchmark
-{
-public:
-
-  //============================ public functions ============================
-  Benchmark(const std::string& name);
-  ~Benchmark();
-
-  // Add a point to the average
-  void add(const TimeSpan&);
-
-  // Get the average elapsed time
-  TimeSpan avg() const { return _div > 0 ? _sum / _div : TimeSpan(0); }
-
-  // Get the number of point in the average
-  long div() const { return _div; }
-
-  // Get the benchmark name
-  const std::string& getName() const { return _name; }
-
-private:
-
-  //============================ private members =============================
-  std::string _name;
-  TimeSpan _sum;
-  long _div;
-};
-
-
-//================================= StopWatch ==================================
-
-class StopWatch
-{
-public:
-
-  //============================ public functions ============================
-  StopWatch(Benchmark*);
-  ~StopWatch();
-
-private:
-
-  //============================ private members =============================
-  Benchmark* _benchmark;
-  TimePoint _start;
-  TimePoint _stop;
+    // Function to convert a timespan in a chosen unit (sec ms us...)
+    template <typename UNIT>  // PLOP
+    TYPE as() { return std::chrono::duration_cast<UNIT>(Duration(this->count())).count(); }
+  };
 };
 
 
