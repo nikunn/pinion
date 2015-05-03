@@ -5,6 +5,35 @@
 #include <vector>
 
 #include "Framework/Clock.h"
+#include "Framework/LuaBind.h"
+#include "Framework/Dispatcher.h"
+
+//======================= Timer Dispatch Listener Event ========================
+// Timer Event class.
+class TimerEvent : Event
+{
+public :
+  TimerEvent() {};
+};
+
+// Forward declaration of class timer.
+class Timer;
+
+// Timer Dispatcher class.
+using TimerDispatcher = Dispatcher<TimerEvent>;
+
+// Timer Listener class.
+class TimerListener : public Listener<TimerEvent>
+{
+  public:
+
+  // Forbid the use of default constructor.
+  TimerListener() = delete;
+
+  // Constructor based on a config block.
+  TimerListener(const LuaTable&);
+};
+
 
 //=================================== Timer ====================================
 class Timer
@@ -66,10 +95,13 @@ public:
   Timer();
 
   // Define a () operator to start a timer in a new thread
-  void operator() () { _start(); }
+  void operator() () { start(); }
 
   // Add a timer with a given period in milliseconds and return channel id
   static int add_channel(long period);
+
+  // Start the timer
+  static void start();
 
   // Stop the timer
   static void stop();
@@ -80,9 +112,6 @@ private:
 
   // Initialize the timer
   static void _initialize();
-
-  // Start the timer
-  static void _start();
 
   // wait for next callback
   static void _wait();

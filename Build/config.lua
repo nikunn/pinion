@@ -15,7 +15,7 @@ Universe =
   -- List of wires connecting the sensors
   {
     -- Uart wire connecting GPS
-    "UartWire",
+    --"UartWire",
 
     -- I2C wire connecting sensors
     "I2cWire",
@@ -24,7 +24,7 @@ Universe =
   -- List of sensors plugged to data acquisition devices
   {
     -- GPS Sensor
-    "GPS",
+    --"GPS",
 
     -- Accelerometer
     "Accel",
@@ -94,6 +94,7 @@ Catalog =
     daq = daq_device,
     wire = "I2cWire",
     gravity_axis = "Z",
+    period_ms = 400, -- in Millisecond
   },
 
   Magneto =
@@ -103,6 +104,7 @@ Catalog =
     daq = daq_device,
     wire = "I2cWire",
     gain = 1.3, -- in something, (1.3/1.9/2.5/4.0/4.7/5.6/8.1)
+    period_ms = 200, -- in Millisecond
   },
 
   Gyro =
@@ -112,6 +114,7 @@ Catalog =
     daq = daq_device,
     wire = "I2cWire",
     range = 250, -- in degree per second, (250/500/2000)
+    period_ms = 100, -- in Millisecond
   },
 }
 

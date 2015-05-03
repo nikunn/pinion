@@ -10,7 +10,7 @@
 // Useful Macro to benchmark a scope
 //=============================================================================\'
 #define BENCH_SCOPE(name)                                                      \
-  static Benchmark bench(name);                                                \
+  static StopWatch::Benchmark bench(name);                                     \
   StopWatch sw(&bench);                                                        \
 //=============================================================================\'
 
@@ -27,6 +27,8 @@ class StopWatch
 
 
   //=============================== Benchmark ================================
+
+public:
 
   class Benchmark
   {

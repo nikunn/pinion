@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <thread>
 
 #include "Framework/LuaBind.h"
 #include "Framework/Logger.h"
 #include "Framework/Factory.h"
 #include "Framework/Universe.h"
+#include "Framework/StopWatch.h"
+#include "Framework/Timer.h"
 
 // Include the data acquisition device file
 #if defined __DEVICE_LAB__
@@ -14,7 +17,6 @@
 #endif
 
 #include "Sensor/All.h"
-
 
 //=================================== Main =====================================
 int main()
@@ -53,32 +55,20 @@ int main()
   LinuxBoardDaq* daq = static_cast<LinuxBoardDaq*>(Factory::get("UXB"));
   #endif
 
-  /*
-  //AccelLSM303* accel = static_cast<AccelLSM303*>(Factory::get("Accel"));
-  //MagnetoMAG303* magneto = static_cast<MagnetoMAG303*>(Factory::get("Magneto"));
+  AccelLSM303* accel = static_cast<AccelLSM303*>(Factory::get("Accel"));
+  MagnetoMAG303* magneto = static_cast<MagnetoMAG303*>(Factory::get("Magneto"));
   GyroL3GD20* gyro = static_cast<GyroL3GD20*>(Factory::get("Gyro"));
 
-  if (gyro->init())
-  {
-    INFO_LG("Gyro init ok");
-
-    while (true)
-    {
-      gyro->get();
-      usleep(300000);
-      //accel->get();
-      //usleep(100000);
-      //magneto->get();
-      //usleep(100000);
-    }
-  }
-  else { INFO_LG("Gyro init failed"); }
-  */
-
-  GpsFGP* gps = static_cast<GpsFGP*>(Factory::get("GPS"));
+  // GpsFGP* gps = static_cast<GpsFGP*>(Factory::get("GPS"));
   //gps->init();
-  while (true)
+
+  if (gyro->init() && accel->init() && magneto->init())
   {
-    usleep(1000000);
+    std::thread t(Timer::start);
+    t.detach();
   }
+  else { INFO_LG("I2C sensor init failed"); }
+
+  sleep(10);
+  return 0;
 }

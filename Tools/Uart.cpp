@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 
 #include "Framework/Logger.h"
+#include "Framework/StopWatch.h"
 #include "Tools/Uart.h"
 
 
@@ -178,6 +179,9 @@ void UartLinux::uartClose(const int handle)
 // Write to UART
 void UartLinux::uartWrite(const int handle, const UartPacket& packet)
 {
+  // Benchmark UART write actions.
+  BENCH_SCOPE("UART WRITE");
+
   // Get the packet content
   const std::string& message = packet.message;
 
@@ -193,6 +197,9 @@ void UartLinux::uartRead(const int handle, byte* data, int& bytes_num)
 // Function called when we received a new packet
 void UartLinux::onEvent(int signo, siginfo_t* info, void*)
 {
+  // Benchmark UART event actions.
+  BENCH_SCOPE("UART EVENT");
+
   // Define the buffer we will read data to
   char buff[UART_PACKET_SIZE];
 

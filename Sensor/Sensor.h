@@ -6,6 +6,7 @@
 
 #include "Framework/Types.h"
 #include "Framework/Factory.h"
+#include "Framework/Timer.h"
 #include "Tools/Uart.h"
 
 
@@ -69,7 +70,7 @@ private : //======================= Private ======================
 
 
 //=================================== I2cSensor ================================
-class I2cSensor : public Sensor
+class I2cSensor : public Sensor, public TimerListener
 {
 public :  //======================== Public ======================
 
@@ -80,6 +81,9 @@ public :  //======================== Public ======================
 
   void read(const byte regis, byte* data, const int bytes_num = 1);
   void write(const byte regis, byte* data, const int bytes_num = 1);
+
+  virtual void get() = 0;
+  void onEvent(const TimerEvent&) { get(); }
 
 protected : //===================== Protected ====================
 

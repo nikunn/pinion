@@ -14,7 +14,7 @@ StopWatch::Benchmark::Benchmark(const std::string& name) : _name(name), _sum(0),
 StopWatch::Benchmark::~Benchmark()
 {
   // Dump the log
-  INFO_PF("Benchmark %s %f %u", getName().c_str(), avg().as<MicroSeconds>(), div());
+  INFO_PF("Benchmark %s %u %u", getName().c_str(), avg().as<MicroSeconds>(), div());
 }
 
 // Add a point to the average

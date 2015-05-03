@@ -15,7 +15,7 @@ Sensor::Sensor(const LuaTable& cfg)
 
 
 //=================================== I2cSensor ================================
-I2cSensor::I2cSensor(const LuaTable& cfg) : Sensor(cfg)
+I2cSensor::I2cSensor(const LuaTable& cfg) : Sensor(cfg), TimerListener(cfg)
 {
   // Set Wire
   std::string wire_name = cfg.get<std::string>("wire");
@@ -164,5 +164,3 @@ AsynchSensor::AsynchSensor(const LuaTable& cfg) : UartSensor(cfg)
   // Register to this handle
   AsynchDispatcher::registerListener(handle, static_cast<AsynchListener*>(this));
 }
-
-

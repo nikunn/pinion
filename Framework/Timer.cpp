@@ -54,7 +54,7 @@ int Timer::add_channel(long period)
     if (channel.period == period)
     {
       // Timer fot his period has already been registered, return the associated id
-      INFO_PF("Channel with %u ms period already registered", period);
+      INFO_PF("Timer channel with %u ms period already registered", period);
 
       // Return the associated id
       return channel.id;
@@ -65,7 +65,7 @@ int Timer::add_channel(long period)
   if (getStatus())
   {
     // Dump  a log
-    ERROR_LG("Cannot add new channel in timer, currently running");
+    ERROR_LG("Timer cannot add new channel in timer, currently running");
 
     // Return negative result
     return -1;
@@ -73,7 +73,7 @@ int Timer::add_channel(long period)
   else
   {
     // Dump  a log
-    INFO_PF("Add new channel to timer with %u ms period", period);
+    INFO_PF("Timer, add new channel to timer with %u ms period", period);
 
     // Get the new id
     int id = getChannels().size() + 1;
@@ -88,6 +88,9 @@ int Timer::add_channel(long period)
 
 void Timer::stop()
 {
+  // A bit of log
+  INFO_LG("Timer Stop");
+
   // Change the running flag to false
   getStatus() = false;
 }
@@ -111,8 +114,11 @@ void Timer::_initialize()
   }
 }
 
-void Timer::_start()
+void Timer::start()
 {
+  // A bit of log
+  INFO_LG("Timer Start");
+
   // Call the initialization
   _initialize();
 
@@ -178,6 +184,9 @@ void Timer::_callback()
   // Get the current time
   TimePoint current_time = Clock::now();
 
+  // Create a timer event for this callback
+  const TimerEvent evt;
+
   // Go through each channel associated with this callback
   auto range = getCallBacks().equal_range(*callback);
   for (auto it = range.first; it != range.second; ++it)
@@ -186,10 +195,10 @@ void Timer::_callback()
     int id = callback->id;
 
     // Call the dispatcher for this channel
-    //
+    TimerDispatcher::dispatch(id, evt);
 
     // Get the period for this channel
-    long period  =getChannels()[id - 1].period;
+    long period = getChannels()[id - 1].period;
 
     // Compute this channel next callback time
     TimePoint next_time = current_time + MilliSeconds(period);
@@ -207,4 +216,18 @@ void Timer::_callback()
     // Insert the next callback for this channel
     getCallBacks().insert(cb);
   }
+}
+
+//=============================== TimerListener ================================
+// Constructor.
+TimerListener::TimerListener(const LuaTable& cfg)
+{
+  // Get the period from the config.
+  long period = cfg.get<long>("period_ms");
+
+  // Add a new channel with the given period.
+  int channel = Timer::add_channel(period);
+
+  // Register to this channel.
+  TimerDispatcher::registerListener(channel, static_cast<Listener<TimerEvent>*>(this));
 }

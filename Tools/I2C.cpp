@@ -4,6 +4,7 @@
 
 #include "Include/I2cTools/include/linux/i2c-dev.h"
 #include "Framework/Logger.h"
+#include "Framework/StopWatch.h"
 #include "Tools/I2C.h"
 
 #define I2C_RESTART  1<<8    // Repeated start
@@ -58,6 +59,9 @@ void I2cLinux::i2cClose(const int handle)
 int I2cLinux::i2cRead(const int handle, const byte address, const byte regis,
                       byte* data, const int bytes_num)
 {
+  // Benchmark I2C read actions.
+  BENCH_SCOPE("I2C READ");
+
   // Create slave adress adding read/write bit from sensor 7bit address
   byte addr_read = (address << 1) | I2C_READING_BIT;
   byte addr_write = (address << 1) & ~I2C_READING_BIT;
@@ -98,6 +102,9 @@ int I2cLinux::i2cRead(const int handle, const byte address, const byte regis,
 int I2cLinux::i2cWrite(const int handle, const byte address, const byte regis,
                        const byte* data, const int bytes_num)
 {
+  // Benchmark I2C write actions.
+  BENCH_SCOPE("I2C WRITE");
+
   // Create slave write adress adding write bit from sensor 7bit address
   byte addr_write = (address << 1) & ~1;
 
