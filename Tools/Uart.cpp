@@ -12,17 +12,8 @@
 #include "Tools/Uart.h"
 
 
-//================================== UartCom ===================================
-UartCom::Type UartCom::parse(const std::string& com)
-{
-  if (com == "serial") { return UartCom::SERIAL; }
-  else if(com == "asynch") { return UartCom::ASYNCH; }
-  else { FATAL_PF("The UART communication type %s is not reconized", com.c_str()); }
-}
-
-
 //================================= UartLinux ==================================
-int UartLinux::uartOpen(const std::string& device_name, const long baud, const UartCom::Type com)
+int UartLinux::uartOpen(const std::string& device_name, const long baud)
 {
   // Open the UART device
   int handle = open(device_name.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -39,15 +30,8 @@ int UartLinux::uartOpen(const std::string& device_name, const long baud, const U
     FATAL_PF("Device %s is not a UART device", device_name.c_str());
   }
 
-  // Apply the right configuration for this communication type
-  switch (com)
-  {
-    case UartCom::ASYNCH: asynchConfig(handle); break ;
-    case UartCom::SERIAL: serialConfig(handle); break ;
-
-    default:
-      FATAL_LG("The chosen UART communication type is not reconized");
-  }
+  // Apply the UART configuration for this device
+  uartConfig(handle);
 
   // Change the baud rate
   changeBaud(handle, baud);
@@ -69,51 +53,9 @@ void UartLinux::applyConfig(const int handle, const termios& config)
   }
 }
 
-// Configure the given handle device in serial mode
-void UartLinux::serialConfig(const int handle)
+// Configure the given handle device
+void UartLinux::uartConfig(const int handle)
 {
-}
-
-// Configure the given handle device in asynchronous mode
-void UartLinux::asynchConfig(const int handle)
-{
-  // Definition of signal action
-  struct sigaction saio;
-
-  // Configure the signal handler before making the device asynchronous
-  saio.sa_sigaction = onEvent;
-  sigemptyset(&(saio.sa_mask));
-  saio.sa_flags = 0;
-  saio.sa_restorer = NULL;
-
-  // Tells Sigaction to add sig_info_t *info and void *context to the callback signature
-  saio.sa_flags = SA_SIGINFO;
-
-  // Call to sigaction to allow the callback on IO signal
-  if(sigaction(SIGIO, &saio, NULL) < 0)
-  {
-    FATAL_PF("Could not register action to handle %u IO signals", handle);
-  }
-
-  // Allow the process to receive SIGIO (socket owner)
-  if(fcntl(handle, F_SETOWN, getpid()) < 0)
-  {
-    FATAL_PF("Could not make process be socket owner for handle %u IO signals", handle);
-  }
-
-  // Make Linux populate si_fd and si_band in the siginfo struct
-  if(fcntl(handle, F_SETSIG, SIGIO) < 0)
-  {
-    FATAL_PF("Could not make the handle %u callback informations available", handle);
-  }
-
-  // Make the file descriptor asynchronous (the manual page says only
-  // O_APPEND and O_NONBLOCK, will work with F_SETFL...)
-  if(fcntl(handle, F_SETFL, FASYNC) < 0)
-  {
-    FATAL_PF("Could not make the handle %u asynchronous", handle);
-  }
-
   // Define the UART option
   termios config;
 
@@ -177,34 +119,26 @@ void UartLinux::uartClose(const int handle)
 }
 
 // Write to UART
-void UartLinux::uartWrite(const int handle, const UartPacket& packet)
+void UartLinux::uartWrite(const int handle, const UartPacket& pkt)
 {
   // Benchmark UART write actions.
   BENCH_SCOPE("UART WRITE");
 
-  // Get the packet content
-  const std::string& message = packet.message;
+  // Get the message
+  const std::string& message = pkt.message;
 
   // Write the packet content to the UART
   int bytes_write = write(handle, message.c_str(), message.length());
 }
 
 // Read from UART
-void UartLinux::uartRead(const int handle, byte* data, int& bytes_num)
-{
-}
-
-// Function called when we received a new packet
-void UartLinux::onEvent(int signo, siginfo_t* info, void*)
+UartPacket UartLinux::uartRead(const int handle)
 {
   // Benchmark UART event actions.
-  BENCH_SCOPE("UART EVENT");
+  BENCH_SCOPE("UART READ");
 
   // Define the buffer we will read data to
   char buff[UART_PACKET_SIZE];
-
-  // Get the handle from the signal info
-  const int handle = info->si_fd;
 
   // Read the buffer
   int bytes_read = read(handle, buff, UART_PACKET_SIZE);
@@ -214,22 +148,13 @@ void UartLinux::onEvent(int signo, siginfo_t* info, void*)
   {
     // Print an error log
     ERROR_PF("Could not read UART buffer on handle %u", handle);
-
-    // Exit the function
-    return;
   }
 
   // Make the buffer null terminated
   buff[bytes_read]=0;
 
-  // Get the packetId
-  long id = 0;//getPacketId(handle);
-
-  // Create a packet from this buffer and id
-  const UartPacket evt(buff, id);
-
-  // Dispatch this event to the listeners
-  AsynchDispatcher::dispatch(handle, evt);
+  // Return the result
+  return UartPacket(buff, 0);
 }
 
 // Get the baud rate in termios format from long
@@ -260,20 +185,3 @@ speed_t UartLinux::longToBaud(const long baud)
       FATAL_PF("The UART baud rate %u is not compatible", baud);
   }
 }
-
-// Function returning the number of byte in the UART buffer
-int UartLinux::bytesAvailable(const int handle)
-{
-  // Inititialize the number of available bytes
-  int result;
-
-  // Check for errors
-  if (ioctl(handle, FIONREAD, &result) < 0)
-  {
-    ERROR_PF("Could not get the number of available byte on handle %u", handle);
-  }
-
-  // Return the result
-  return result ;
-}
-

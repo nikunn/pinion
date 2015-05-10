@@ -76,9 +76,6 @@ UartWire::UartWire(const LuaTable& cfg) : Wire(cfg)
   // Get the communication type
   std::string com_type_str = cfg.get<std::string>("com_type");
 
-  // Parse the communication type
-  _com_type = UartCom::parse(com_type_str);
-
   // Open the connection to this serial device
   _handle = daq().uartOpen(*this);
 
@@ -91,7 +88,7 @@ UartWire::UartWire(const LuaTable& cfg) : Wire(cfg)
 // Destructor
 UartWire::~UartWire()
 {
-  // Close connection to I2C bus
+  // Close connection to UART
   daq().uartClose(*this);
 }
 

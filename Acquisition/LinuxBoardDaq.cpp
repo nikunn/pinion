@@ -65,7 +65,7 @@ void LinuxBoardDaq::i2cWrite(const I2cSensor& sensor, const byte regis,
 // Open UART device
 int LinuxBoardDaq::uartOpen(const UartWire& wire)
 {
-  return UartLinux::uartOpen(wire.device(), wire.defaultBaud(), wire.comType());
+  return UartLinux::uartOpen(wire.device(), wire.defaultBaud());
 }
 
 // Close UART device

@@ -26,7 +26,7 @@ class Dispatcher
 {
 public :  //======================= Typedefs =====================
 
-  typedef std::multimap<int, Listener<EVT>*> ListenerContainer;
+  using ListenerContainer = std::multimap<int, Listener<EVT>*>;
 
 public :  //======================== Public ======================
 

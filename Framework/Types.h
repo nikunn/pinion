@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 //================================== Typedefs ==================================
-typedef uint8_t byte;
+using byte = uint8_t;
 
 // Convert two byte to 16 bit int
 static int16_t int8To16(byte* ent)

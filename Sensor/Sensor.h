@@ -7,6 +7,7 @@
 #include "Framework/Types.h"
 #include "Framework/Factory.h"
 #include "Framework/Timer.h"
+#include "Framework/Signal.h"
 #include "Tools/Uart.h"
 
 
@@ -151,7 +152,7 @@ protected : //===================== Protected ====================
 
 
 //================================== AsynchSensor ==============================
-class AsynchSensor : public UartSensor, public AsynchListener
+class AsynchSensor : public UartSensor, public SignalListener
 {
 public :  //======================== Public ======================
 

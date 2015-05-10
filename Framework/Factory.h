@@ -36,8 +36,8 @@ class Factory
 public:
 
   //================================ Typedefs ================================
-  typedef std::map<std::string, Creator*> ClassContainer;
-  typedef std::map<std::string, Accessible*> ObjectContainer;
+  using ClassContainer = std::map<std::string, Creator*>;
+  using ObjectContainer = std::map<std::string, Accessible*>;
 
 public:
 

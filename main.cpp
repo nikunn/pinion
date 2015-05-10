@@ -55,12 +55,13 @@ int main()
   LinuxBoardDaq* daq = static_cast<LinuxBoardDaq*>(Factory::get("UXB"));
   #endif
 
+  GpsFGP* gps = static_cast<GpsFGP*>(Factory::get("GPS"));
+  gps->init();
+
+  /*
   AccelLSM303* accel = static_cast<AccelLSM303*>(Factory::get("Accel"));
   MagnetoMAG303* magneto = static_cast<MagnetoMAG303*>(Factory::get("Magneto"));
   GyroL3GD20* gyro = static_cast<GyroL3GD20*>(Factory::get("Gyro"));
-
-  // GpsFGP* gps = static_cast<GpsFGP*>(Factory::get("GPS"));
-  //gps->init();
 
   if (gyro->init() && accel->init() && magneto->init())
   {
@@ -68,7 +69,8 @@ int main()
     t.detach();
   }
   else { INFO_LG("I2C sensor init failed"); }
+  */
 
-  sleep(10);
+  sleep(20);
   return 0;
 }

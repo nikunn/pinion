@@ -82,10 +82,10 @@ public:
   //============================== Typedefs ==============================
 
   // Define the container holding the all channel information
-  typedef std::vector<Channel> ChannelContainer;
+  using ChannelContainer = std::vector<Channel>;
 
   // Define the container holding the callback time and channel id
-  typedef std::multiset<CallBack> CallBackContainer;
+  using CallBackContainer = std::multiset<CallBack>;
 
 public:
 

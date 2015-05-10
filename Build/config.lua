@@ -15,7 +15,7 @@ Universe =
   -- List of wires connecting the sensors
   {
     -- Uart wire connecting GPS
-    --"UartWire",
+    "UartWire",
 
     -- I2C wire connecting sensors
     "I2cWire",
@@ -24,7 +24,7 @@ Universe =
   -- List of sensors plugged to data acquisition devices
   {
     -- GPS Sensor
-    --"GPS",
+    "GPS",
 
     -- Accelerometer
     "Accel",

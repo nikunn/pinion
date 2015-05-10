@@ -37,7 +37,7 @@ public:
 
   bool init();
 
-  void onEvent(const UartPacket&);
+  void onEvent(const SignalEvent&);
 
   bool isAck(const UartPacket&);
   void onAck(const UartPacket&);

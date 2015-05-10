@@ -57,18 +57,21 @@ bool GpsFGP::init()
 }
 
 // Received an event, a full packet
-void GpsFGP::onEvent(const UartPacket& packet)
+void GpsFGP::onEvent(const SignalEvent& evt)
 {
   // Get the message
-  const std::string& message = packet.message;
+  const UartPacket& pkt = UartLinux::uartRead(wire()->handle());
+
+  // Get the message
+  const std::string& message = pkt.message;
 
   // Log the received message
   INFO_PF("GPS onEvent: %s", message.c_str());
 
   // Check if this is a ack and call onAck
-  if (isAck(packet))
+  if (isAck(pkt))
   {
-    onAck(packet);
+    onAck(pkt);
   }
   // Then this is a message containing GPS info
   else
@@ -85,10 +88,10 @@ void GpsFGP::onEvent(const UartPacket& packet)
 }
 
 // Check whether a packet is an ack
-bool GpsFGP::isAck(const UartPacket& packet)
+bool GpsFGP::isAck(const UartPacket& pkt)
 {
   // Get the message
-  const std::string& message = packet.message;
+  const std::string& message = pkt.message;
 
   if (message.rfind(std::string("PMTK001")) != std::string::npos
       && message.length() == FGP_ACK_LEN)
@@ -102,10 +105,10 @@ bool GpsFGP::isAck(const UartPacket& packet)
 }
 
 // Action when receiving ack
-void GpsFGP::onAck(const UartPacket& packet)
+void GpsFGP::onAck(const UartPacket& pkt)
 {
   // Get the message
-  const std::string& message = packet.message;
+  const std::string& message = pkt.message;
 
   // Get the command id
   int cmd_id = std::atoi(message.substr(9, 3).c_str());

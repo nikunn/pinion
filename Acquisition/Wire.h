@@ -76,11 +76,9 @@ public :
   int transmitLine() const { return _transmit_line; }
   int receiveLine() const { return _receive_line; }
 
-  UartCom::Type comType() const { return _com_type; }
   long defaultBaud() const { return _default_baud; }
 
 private :
-  UartCom::Type _com_type;
   int _transmit_line;
   int _receive_line;
 

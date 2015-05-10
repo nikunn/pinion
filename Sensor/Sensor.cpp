@@ -161,6 +161,9 @@ AsynchSensor::AsynchSensor(const LuaTable& cfg) : UartSensor(cfg)
   // Get the handle
   int handle = wire()->handle();
 
-  // Register to this handle
-  AsynchDispatcher::registerListener(handle, static_cast<AsynchListener*>(this));
+  // Add this device to the Signal Multiplexer
+  SignalMux::add(handle);
+
+  // Register to this device
+  SignalDispatcher::registerListener(handle, static_cast<SignalListener*>(this));
 }

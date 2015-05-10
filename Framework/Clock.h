@@ -6,10 +6,10 @@
 #include <chrono>
 
 // Some useful typedef
-typedef std::chrono::seconds Seconds;
-typedef std::chrono::milliseconds MilliSeconds;
-typedef std::chrono::microseconds MicroSeconds;
-typedef std::chrono::nanoseconds NanoSeconds;
+using Seconds = std::chrono::seconds;
+using MilliSeconds = std::chrono::milliseconds;
+using MicroSeconds = std::chrono::microseconds;
+using NanoSeconds = std::chrono::nanoseconds;
 
 
 //=================================== Clock ====================================

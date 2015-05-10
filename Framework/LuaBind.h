@@ -5,8 +5,8 @@
 
 
 //================================= Typedefs ===================================
-typedef sol::state LuaState;
-typedef sol::table LuaTable;
+using LuaState = sol::state;
+using LuaTable = sol::table;
 
 //================================= LuaScript ==================================
 class LuaScript
