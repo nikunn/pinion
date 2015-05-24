@@ -29,7 +29,7 @@
 #define FGP_ACK_LEN 18
 
 //===================================== GpsFGP =================================
-class GpsFGP : public AsynchSensor
+class GpsFGP : public PollSensor
 {
 public:
 
@@ -37,7 +37,7 @@ public:
 
   bool init();
 
-  void onEvent(const SignalEvent&);
+  void onEvent(const PollEvent&);
 
   bool isAck(const UartPacket&);
   void onAck(const UartPacket&);

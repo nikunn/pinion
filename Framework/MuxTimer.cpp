@@ -1,12 +1,12 @@
 #include <thread>
 
-#include "Framework/Timer.h"
 #include "Framework/Logger.h"
+#include "Framework/MuxTimer.h"
 
 //=================================== Timer ====================================
 
 // Timer constructor
-Timer::Timer()
+MuxTimer::MuxTimer()
 {
   // Initialize the running flag to false
   getStatus() = false;
@@ -15,8 +15,8 @@ Timer::Timer()
   INFO_PF("Timer clock has a resolution of %f", Clock::resolution());
 }
 
-// Return static container of all channels
-bool& Timer::getStatus()
+// Return status
+bool& MuxTimer::getStatus()
 {
   // Declaration of static boolean is running
   static bool _status;
@@ -26,7 +26,7 @@ bool& Timer::getStatus()
 }
 
 // Return static container of all channels
-Timer::ChannelContainer& Timer::getChannels()
+MuxTimer::ChannelContainer& MuxTimer::getChannels()
 {
   // Declaration of static class container
   static ChannelContainer _channels;
@@ -35,8 +35,8 @@ Timer::ChannelContainer& Timer::getChannels()
   return _channels;
 }
 
-// Return static container of callbacks
-Timer::CallBackContainer& Timer::getCallBacks()
+// Return static container of all callbacks
+MuxTimer::CallBackContainer& MuxTimer::getCallBacks()
 {
   // Declaration of static class container
   static CallBackContainer _callbacks;
@@ -46,7 +46,7 @@ Timer::CallBackContainer& Timer::getCallBacks()
 }
 
 // Add a channel to the timer with a given period
-int Timer::add_channel(long period)
+int MuxTimer::add_channel(long period)
 {
   // Check if this period is already registered
   for (Channel& channel : getChannels())
@@ -86,7 +86,7 @@ int Timer::add_channel(long period)
   }
 }
 
-void Timer::stop()
+void MuxTimer::stop()
 {
   // A bit of log
   INFO_LG("Timer Stop");
@@ -95,7 +95,7 @@ void Timer::stop()
   getStatus() = false;
 }
 
-void Timer::_initialize()
+void MuxTimer::_initialize()
 {
   // Change the running flag to true
   getStatus() = true;
@@ -114,7 +114,7 @@ void Timer::_initialize()
   }
 }
 
-void Timer::start()
+void MuxTimer::start()
 {
   // A bit of log
   INFO_LG("Timer Start");
@@ -143,7 +143,7 @@ void Timer::start()
 }
 
 // Wait function
-void Timer::_wait()
+void MuxTimer::_wait()
 {
   // Get the next callback information
   const auto callback = getCallBacks().cbegin();
@@ -170,7 +170,7 @@ void Timer::_wait()
 }
 
 // Process callback and call dispatcher
-void Timer::_callback()
+void MuxTimer::_callback()
 {
   // Define a vector containing all new callbacks
   std::vector<CallBack> new_callbacks;
@@ -226,7 +226,7 @@ TimerListener::TimerListener(const LuaTable& cfg)
   long period = cfg.get<long>("period_ms");
 
   // Add a new channel with the given period.
-  int channel = Timer::add_channel(period);
+  int channel = MuxTimer::add_channel(period);
 
   // Register to this channel.
   TimerDispatcher::registerListener(channel, static_cast<Listener<TimerEvent>*>(this));

@@ -1,5 +1,5 @@
-#ifndef _SIGNALMUX_H
-#define _SIGNALMUX_H
+#ifndef _MUX_SIGNAL_H
+#define _MUX_SIGNAL_H
 
 // Posix compliant source
 #define _POSIX_SOURCE 1
@@ -24,8 +24,8 @@ using SignalListener = Listener<SignalEvent>;
 using SignalDispatcher = Dispatcher<SignalEvent>;
 
 
-//================================= SignalMux ==================================
-class SignalMux
+//================================= MuxSignal ==================================
+class MuxSignal
 {
 public:
 

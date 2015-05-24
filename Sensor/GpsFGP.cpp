@@ -4,7 +4,7 @@
 
 //===================================== GpsFGP =================================
 // Constructor
-GpsFGP::GpsFGP(const LuaTable& cfg) : AsynchSensor(cfg)
+GpsFGP::GpsFGP(const LuaTable& cfg) : PollSensor(cfg)
 {
   // Get baud
   _baud = cfg.get<long>("start_baud");
@@ -56,8 +56,8 @@ bool GpsFGP::init()
   return true;
 }
 
-// Received an event, a full packet
-void GpsFGP::onEvent(const SignalEvent& evt)
+// Received an event, a full packetSignalEvent
+void GpsFGP::onEvent(const PollEvent& evt)
 {
   // Get the message
   const UartPacket& pkt = UartLinux::uartRead(wire()->handle());

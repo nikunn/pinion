@@ -154,16 +154,31 @@ void SerialSensor::read()
 }
 
 
-//================================== AsynchSensor ==============================
+//================================== SignalSensor ==============================
 //Constructor
-AsynchSensor::AsynchSensor(const LuaTable& cfg) : UartSensor(cfg)
+SignalSensor::SignalSensor(const LuaTable& cfg) : UartSensor(cfg)
 {
   // Get the handle
   int handle = wire()->handle();
 
   // Add this device to the Signal Multiplexer
-  SignalMux::add(handle);
+  MuxSignal::add(handle);
 
   // Register to this device
   SignalDispatcher::registerListener(handle, static_cast<SignalListener*>(this));
+}
+
+
+//=================================== PollSensor ===============================
+//Constructor
+PollSensor::PollSensor(const LuaTable& cfg) : UartSensor(cfg)
+{
+  // Get the handle
+  int handle = wire()->handle();
+
+  // Add this device to the Signal Multiplexer
+  MuxPoll::add(handle);
+
+  // Register to this device
+  PollDispatcher::registerListener(handle, static_cast<PollListener*>(this));
 }

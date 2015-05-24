@@ -70,7 +70,7 @@ project "nmea"
 project "framework"
   kind "SharedLib"
   links { "external" }
-  files { "Src/Framework/Factory.cpp", "Src/Framework/Universe.cpp", "Src/Framework/StopWatch.cpp", "Src/Framework/Timer.cpp", "Src/Framework/Signal.cpp"}
+  files { "Src/Framework/Factory.cpp", "Src/Framework/Universe.cpp", "Src/Framework/StopWatch.cpp", "Src/Framework/Mux*.cpp" }
   includedirs { "Src/", "/usr/include/lua5.2/", "Src/Include/Sol/" }
   targetdir "lib/"
 

@@ -1,5 +1,5 @@
-#ifndef _TIMER_H
-#define _TIMER_H
+#ifndef _MUX_TIMER_H
+#define _MUX_TIMER_H
 
 #include <set>
 #include <vector>
@@ -17,7 +17,7 @@ public :
 };
 
 // Forward declaration of class timer.
-class Timer;
+class MuxTimer;
 
 // Timer Dispatcher class.
 using TimerDispatcher = Dispatcher<TimerEvent>;
@@ -35,8 +35,8 @@ class TimerListener : public Listener<TimerEvent>
 };
 
 
-//=================================== Timer ====================================
-class Timer
+//================================== MuxTimer ==================================
+class MuxTimer
 {
 private:
 
@@ -92,7 +92,7 @@ public:
   //============================ public functions ============================
 
   // Constructor
-  Timer();
+  MuxTimer();
 
   // Define a () operator to start a timer in a new thread
   void operator() () { start(); }

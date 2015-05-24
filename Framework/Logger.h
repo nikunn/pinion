@@ -7,9 +7,9 @@
 //=============================================================================\'
 #define LOGGER_PRINTF(TYPE, ...)                                               \
   {                                                                            \
-  char* buffer;                                                                \
-  asprintf(&buffer, __VA_ARGS__);                                              \
-  Logger::print_##TYPE(buffer);                                                \
+  char* buffer_logger;                                                                \
+  asprintf(&buffer_logger, __VA_ARGS__);                                              \
+  Logger::print_##TYPE(buffer_logger);                                                \
   }                                                                            \
 //=============================================================================\'
 

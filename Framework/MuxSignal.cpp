@@ -7,14 +7,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "Framework/Signal.h"
 #include "Framework/Logger.h"
 #include "Framework/StopWatch.h"
+#include "Framework/MuxSignal.h"
 
-//================================= SignalMux ==================================
+//================================= MuxSignal ==================================
 
 // Configure the given handle device in asynchronous mode
-void SignalMux::add(const int handle)
+void MuxSignal::add(const int handle)
 {
   // Definition of signal action
   struct sigaction saio;
@@ -55,7 +55,7 @@ void SignalMux::add(const int handle)
 }
 
 // Function called when we received a new signal
-void SignalMux::onEvent(int signo, siginfo_t* info, void*)
+void MuxSignal::onEvent(int signo, siginfo_t* info, void*)
 {
   // Benchmark UART event actions.
   BENCH_SCOPE("SIGNAL EVENT");

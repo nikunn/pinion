@@ -6,8 +6,9 @@
 
 #include "Framework/Types.h"
 #include "Framework/Factory.h"
-#include "Framework/Timer.h"
-#include "Framework/Signal.h"
+#include "Framework/MuxPoll.h"
+#include "Framework/MuxTimer.h"
+#include "Framework/MuxSignal.h"
 #include "Tools/Uart.h"
 
 
@@ -151,12 +152,21 @@ protected : //===================== Protected ====================
 };
 
 
-//================================== AsynchSensor ==============================
-class AsynchSensor : public UartSensor, public SignalListener
+//================================== SignalSensor ==============================
+class SignalSensor : public UartSensor, public SignalListener
 {
 public :  //======================== Public ======================
 
-  AsynchSensor(const LuaTable&);
+  SignalSensor(const LuaTable&);
+};
+
+
+//=================================== PollSensor ===============================
+class PollSensor : public UartSensor, public PollListener
+{
+public :  //======================== Public ======================
+
+  PollSensor(const LuaTable&);
 };
 
 
