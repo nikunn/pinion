@@ -43,7 +43,7 @@ int UartLinux::uartOpen(const std::string& device_name, const long baud)
 // Apply a termios configuration to an UART handle
 void UartLinux::applyConfig(const int handle, const termios& config)
 {
-  // Flush
+  // Flush the input queue
   tcflush(handle, TCIFLUSH);
 
   // Finally, apply the configuration
@@ -103,6 +103,9 @@ void UartLinux::changeBaud(const int handle, const long baud)
 
   // Apply configuration
   applyConfig(handle, config);
+
+  // Flush the input and output queue
+  tcflush(handle, TCIOFLUSH);
 }
 
 // Close a UART device

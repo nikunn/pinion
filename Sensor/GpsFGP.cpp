@@ -50,7 +50,7 @@ bool GpsFGP::init()
   // Change the baud rate to 57600
   INFO_LG("GPS: Changing the baud rate");
   cmd = UartPacket(FGP_PMTK_BAUD_57600, 251);
-  //changeBaud(cmd, 57600);
+  changeBaud(cmd, 57600);
 
   // Initialization went fine
   return true;

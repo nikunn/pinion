@@ -49,6 +49,9 @@ void UartSensor::changeBaud(const UartPacket& cmd, const long baud)
   // Send the message to change the baud to the sensor
   daq().uartWrite(*this, cmd.message.c_str());
 
+  // Sleep a bit.
+  sleep(1);
+
   // Change the baud
   _baud = baud;
 
