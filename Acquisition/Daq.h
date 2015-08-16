@@ -25,6 +25,11 @@ public :  //======================== Public ======================
   virtual void deviceClose() = 0;
   virtual void deviceInfo() = 0;
 
+          //======================== PWM =========================
+  virtual void pwmInit(const std::string pin, const pwmConfig& pwm) = 0;
+  virtual void pwmSetStatus(const std::string& pin, const bool status) = 0;
+  virtual bool pwmGetStatus(const std::string& pin) = 0;
+
           //================= I2C Communication ==================
   virtual int i2cOpen(const I2cWire&) = 0;
   virtual void i2cClose(const I2cWire&) = 0;

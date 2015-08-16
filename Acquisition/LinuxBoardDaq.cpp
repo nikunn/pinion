@@ -1,4 +1,5 @@
 #include "Framework/Logger.h"
+#include "Tools/PWM.h"
 #include "Tools/I2C.h"
 #include "Tools/Uart.h"
 #include "Acquisition/LinuxBoardDaq.h"
@@ -29,6 +30,26 @@ void LinuxBoardDaq::deviceClose()
 // Print some informations about this device
 void LinuxBoardDaq::deviceInfo()
 {
+}
+
+//====================================== PWM ===================================
+
+// Initialize PWM pin
+void LinuxBoardDaq::pwmInit(const std::string pin, const pwmConfig& pwm)
+{
+  PwmLinux::pwmInit(pin, pwm);
+}
+
+// Change status of PWM
+void LinuxBoardDaq::pwmSetStatus(const std::string& pin, const bool status)
+{
+  PwmLinux::pwmSetStatus(pin, status);
+}
+
+// Get current status of PWM
+bool LinuxBoardDaq::pwmGetStatus(const std::string& pin)
+{
+  return PwmLinux::pwmGetStatus(pin);
 }
 
 //=============================== I2C Communication ============================

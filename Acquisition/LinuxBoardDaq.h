@@ -26,6 +26,11 @@ public :  //======================== Public ======================
   void deviceClose();
   void deviceInfo();
 
+          //======================== PWM =========================
+  void pwmInit(const std::string pin, const pwmConfig& pwm);
+  void pwmSetStatus(const std::string& pin, const bool status);
+  bool pwmGetStatus(const std::string& pin);
+
           //================= I2C Communication ==================
   int i2cOpen(const I2cWire&);
   void i2cClose(const I2cWire&);

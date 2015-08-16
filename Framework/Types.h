@@ -18,4 +18,11 @@ static int16_t int8To16(byte hi, byte lo)
   return ((int16_t)hi << 8) | lo;
 }
 
+struct pwmConfig
+{
+  bool polarity;
+  unsigned long period;
+  unsigned long duty;
+};
+
 #endif

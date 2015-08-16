@@ -21,7 +21,14 @@ Universe =
     "I2cWire",
   },
 
+  -- List of actuators plugged to data acquisition devices
+  {
+    -- PWM
+    "Pulser",
+  },
+
   -- List of sensors plugged to data acquisition devices
+  --[[
   {
     -- GPS Sensor
     "GPS",
@@ -35,6 +42,7 @@ Universe =
     -- Magnetometer
     "Magneto",
   },
+  --]]
 }
 
 ------------------------------------ Catalog -----------------------------------
@@ -74,6 +82,18 @@ Catalog =
     device = "/dev/i2c-1",
     data_line = 2,
     clock_line = 3,
+  },
+
+    ------------------------------- Actuators ------------------------------
+  Pulser =
+  {
+    name = "Pulser",
+    class = "Pulser",
+    daq = daq_device,
+    pin = "/sys/devices/ocp.3/pwm_test_P9_14.12", -- path to device
+    polarity = true, -- true is High
+    frequency = 100, -- in Hz
+    duty_cycle = 0.5, -- in Percent
   },
 
     -------------------------------- Sensors -------------------------------

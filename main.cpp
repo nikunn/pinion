@@ -18,6 +18,7 @@
 #endif
 
 #include "Sensor/All.h"
+#include "Actuator/Actuator.h"
 
 //=================================== Main =====================================
 int main()
@@ -31,8 +32,14 @@ int main()
   #elif defined __DEVICE_UXB__
   Factory::registerClass("LinuxBoard", new CreatorType<LinuxBoardDaq>);
   #endif
+  // Wire
   Factory::registerClass("UartWire", new CreatorType<UartWire>);
   Factory::registerClass("I2cWire", new CreatorType<I2cWire>);
+
+  // Actuator
+  Factory::registerClass("Pulser", new CreatorType<Pulser>);
+
+  // Sensor
   Factory::registerClass("GPS", new CreatorType<GpsFGP>);
   Factory::registerClass("LSM303", new CreatorType<AccelLSM303>);
   Factory::registerClass("MAG303", new CreatorType<MagnetoMAG303>);
@@ -59,6 +66,10 @@ int main()
   LinuxBoardDaq* daq = static_cast<LinuxBoardDaq*>(Factory::get("UXB"));
   #endif
 
+  Pulser* pwm = static_cast<Pulser*>(Factory::get("Pulser"));
+  pwm->stop();
+
+  /*
   GpsFGP* gps = static_cast<GpsFGP*>(Factory::get("GPS"));
   gps->init();
 
@@ -75,7 +86,8 @@ int main()
 
   std::thread poll_thread(MuxPoll::start);
   poll_thread.detach();
-
   sleep(20);
+  */
+
   return 0;
 }
