@@ -7,6 +7,9 @@
 
 #include "Clock.h"
 
+
+namespace pno
+{
 // Useful Macro to benchmark a scope
 //=============================================================================\'
 #define BENCH_SCOPE(name)                                                      \
@@ -73,4 +76,5 @@ private:
 };
 
 
+}
 #endif

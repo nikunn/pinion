@@ -5,6 +5,9 @@
 #include <ctime>
 #include <chrono>
 
+
+namespace pno
+{
 // Some useful typedef
 using Seconds = std::chrono::seconds;
 using MilliSeconds = std::chrono::milliseconds;
@@ -48,4 +51,5 @@ public:
 };
 
 
+}
 #endif

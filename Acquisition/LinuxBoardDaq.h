@@ -4,6 +4,8 @@
 #include "Acquisition/Daq.h"
 
 
+namespace pno
+{
 //=========================== Forward Declarations =============================
 
 class I2cWire;
@@ -18,16 +20,14 @@ class LinuxBoardDaq : public DaqDevice
 {
 public :  //======================== Public ======================
 
-  LinuxBoardDaq(const LuaTable&);
-  ~LinuxBoardDaq();
+  LinuxBoardDaq(const LuaTable&) {};
+  ~LinuxBoardDaq() {};
 
-          //======================== Device ======================
-  void deviceOpen();
-  void deviceClose();
-  void deviceInfo();
+          //======================== IO ==========================
+  int openFile(const std::string& file);
 
           //======================== PWM =========================
-  void pwmInit(const std::string pin, const pwmConfig& pwm);
+  void pwmInit(const std::string& pin, const pwmConfig& pwm);
   void pwmSetStatus(const std::string& pin, const bool status);
   bool pwmGetStatus(const std::string& pin);
 
@@ -46,4 +46,5 @@ public :  //======================== Public ======================
 };
 
 
+}
 #endif

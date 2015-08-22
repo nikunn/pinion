@@ -6,6 +6,9 @@
 #include "Framework/Accessible.h"
 #include "Framework/LuaBind.h"
 
+
+namespace pno
+{
 //================================== Creator ===================================
 
 // Base class from which will derive the factory creation of objects modules
@@ -61,5 +64,5 @@ private:
 };
 
 
-
+}
 #endif

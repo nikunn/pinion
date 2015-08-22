@@ -4,8 +4,11 @@
 #include "Framework/Accessible.h"
 #include "Framework/LuaBind.h"
 #include "Tools/I2C.h"
-#include "Tools/Uart.h"
+#include "Tools/UART.h"
 
+
+namespace pno
+{
 //=========================== Forward Declarations =============================
 
 class DaqDevice;
@@ -86,5 +89,5 @@ private :
 };
 
 
-
+}
 #endif

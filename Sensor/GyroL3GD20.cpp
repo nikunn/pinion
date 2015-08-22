@@ -2,6 +2,9 @@
 #include "Framework/Logger.h"
 #include "Sensor/GyroL3GD20.h"
 
+
+namespace pno
+{
 //=================================== GyroL3GD20 ===============================
 // Instantiates a new GyroL3GD20 class
 GyroL3GD20::GyroL3GD20(const LuaTable& cfg) : I2cSensor(cfg)
@@ -116,4 +119,7 @@ void GyroL3GD20::get()
 
   // Some log
   INFO_PF("L3GD20 x:%f y:%f z:%f", _data.x, _data.y, _data.z);
+}
+
+
 }

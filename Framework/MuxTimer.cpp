@@ -3,6 +3,9 @@
 #include "Framework/Logger.h"
 #include "Framework/MuxTimer.h"
 
+
+namespace pno
+{
 //=================================== Timer ====================================
 
 // Timer constructor
@@ -230,4 +233,7 @@ TimerListener::TimerListener(const LuaTable& cfg)
 
   // Register to this channel.
   TimerDispatcher::registerListener(channel, static_cast<Listener<TimerEvent>*>(this));
+}
+
+
 }

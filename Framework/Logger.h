@@ -3,6 +3,9 @@
 
 #include "Framework/LuaBind.h"
 
+
+namespace pno
+{
 // Useful macros for log
 //=============================================================================\'
 #define LOGGER_PRINTF(TYPE, ...)                                               \
@@ -51,5 +54,5 @@ public:
 };
 
 
-
+}
 #endif

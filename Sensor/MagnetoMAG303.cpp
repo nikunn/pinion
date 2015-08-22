@@ -2,6 +2,9 @@
 #include "Framework/Logger.h"
 #include "Sensor/MagnetoMAG303.h"
 
+
+namespace pno
+{
 //================================= MagnetoMAG303 ==============================
 // Instantiates a new MagnetoMAG303 class
 MagnetoMAG303::MagnetoMAG303(const LuaTable& cfg) : I2cSensor(cfg)
@@ -124,4 +127,7 @@ void MagnetoMAG303::get()
 
   // Some log if debug
   INFO_PF("MAG303 x:%f y:%f z:%f", _data.x, _data.y, _data.z);
+}
+
+
 }

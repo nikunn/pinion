@@ -5,6 +5,9 @@
 
 #include "Framework/Types.h"
 
+
+namespace pno
+{
 class I2cLinux
 {
 public :  //======================== Public ======================
@@ -23,4 +26,5 @@ private : //======================= Private ======================
 };
 
 
+}
 #endif

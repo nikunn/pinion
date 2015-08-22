@@ -2,9 +2,12 @@
 #include "Framework/Logger.h"
 #include "Sensor/GpsFGP.h"
 
+
+namespace pno
+{
 //===================================== GpsFGP =================================
 // Constructor
-GpsFGP::GpsFGP(const LuaTable& cfg) : PollSensor(cfg)
+GpsFGP::GpsFGP(const LuaTable& cfg) : UartSensor(cfg)
 {
   // Get baud
   _baud = cfg.get<long>("start_baud");
@@ -118,4 +121,7 @@ void GpsFGP::onAck(const UartPacket& pkt)
 
   // Log the received message
   INFO_PF("GPS received an ack commad_id:%u flag:%u", cmd_id, flag);
+}
+
+
 }

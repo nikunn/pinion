@@ -9,6 +9,9 @@
 // I2C address
 #define LSM303_I2CADDR 0x19
 
+
+namespace pno
+{
 // Registers
 enum LSM303_REGISTER
 {
@@ -63,4 +66,5 @@ private:
 };
 
 
+}
 #endif

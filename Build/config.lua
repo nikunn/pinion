@@ -28,6 +28,11 @@ Universe =
   },
 
   -- List of sensors plugged to data acquisition devices
+  {
+    -- Counter
+    "Counter",
+  }
+
   --[[
   {
     -- GPS Sensor
@@ -92,11 +97,20 @@ Catalog =
     daq = daq_device,
     pin = "/sys/devices/ocp.3/pwm_test_P9_14.12", -- path to device
     polarity = true, -- true is High
-    frequency = 100, -- in Hz
+    frequency = 10, -- in Hz
     duty_cycle = 0.5, -- in Percent
   },
 
     -------------------------------- Sensors -------------------------------
+  Counter =
+  {
+    name = "Counter",
+    class = "Counter",
+    daq = daq_device,
+    device = "/sys/class/gpio/gpio115/value",
+    edge = "both",
+  },
+
   GPS =
   {
     name = "GPS",

@@ -3,6 +3,9 @@
 #include "Framework/StopWatch.h"
 #include "Framework/Logger.h"
 
+
+namespace pno
+{
 //================================= Benchmark ==================================
 
 // Constructor
@@ -42,4 +45,7 @@ StopWatch::~StopWatch()
 
   // Add the elapsed time in the benchmark
   _benchmark->add(_stop - _start);
+}
+
+
 }

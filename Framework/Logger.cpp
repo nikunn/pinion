@@ -5,6 +5,8 @@
 // Initialize the logger, should be called only once
 _INITIALIZE_EASYLOGGINGPP
 
+namespace pno
+{
 //=============================================================================\'
 #define LOGGER_IMPLEMENT(TYPE)                                                 \
 void Logger::print_##TYPE(const char* message)                                 \
@@ -80,4 +82,7 @@ void Logger::configure(const LuaTable& lua_config)
 
   // Apply this configuration to the default logger
   el::Loggers::reconfigureLogger("default", log_config);
+}
+
+
 }

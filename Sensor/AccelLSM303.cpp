@@ -2,6 +2,9 @@
 #include "Framework/Logger.h"
 #include "Sensor/AccelLSM303.h"
 
+
+namespace pno
+{
 //================================ AccelLSM303 =============================
 // Instantiates a new AccelLSM303 class
 AccelLSM303::AccelLSM303(const LuaTable& cfg) : I2cSensor(cfg)
@@ -89,4 +92,7 @@ void AccelLSM303::get()
 
   // Some log if debug
   INFO_PF("LSM303 x:%f y:%f z:%f", _data.x, _data.y, _data.z);
+}
+
+
 }

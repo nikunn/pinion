@@ -8,6 +8,9 @@
 
 #include "Framework/Dispatcher.h"
 
+
+namespace pno
+{
 //====================== Sugnal Dispatch Listener Event ========================
 class SignalEvent : Event
 {
@@ -43,4 +46,5 @@ private:
 };
 
 
+}
 #endif

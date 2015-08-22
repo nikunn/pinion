@@ -1,5 +1,8 @@
-#include "Tools/Nmea.h"
+#include "Tools/NMEA.h"
 
+
+namespace pno
+{
 //================================= GpsParser ==================================
 // Constructor
 GpsParser::GpsParser()
@@ -55,4 +58,7 @@ void GpsInfo::reset()
 {
   // Reset the GPS info
   nmea_zero_INFO(&_info);
+}
+
+
 }

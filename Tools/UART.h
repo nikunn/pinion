@@ -9,9 +9,11 @@
 #include "Framework/Dispatcher.h"
 
 // Define the max buffer size and packet size
-#define UART_BUFFER_SIZE 2048 // have to be smaller than 2048 for LabJack use
 #define UART_PACKET_SIZE 248
 
+
+namespace pno
+{
 //================================ UartPacket ==================================
 class UartPacket
 {
@@ -44,4 +46,5 @@ private : //======================= Private ======================
 };
 
 
+}
 #endif

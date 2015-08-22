@@ -1,10 +1,14 @@
 #include <unistd.h>
+#include <sys/epoll.h>
 
 #include "Framework/Logger.h"
 #include "Acquisition/Daq.h"
 #include "Acquisition/Wire.h"
 #include "Sensor/Sensor.h"
 
+
+namespace pno
+{
 //==================================== Sensor ==================================
 Sensor::Sensor(const LuaTable& cfg)
 {
@@ -41,6 +45,15 @@ UartSensor::UartSensor(const LuaTable& cfg) : Sensor(cfg)
   // Set Wire
   std::string wire_name = cfg.get<std::string>("wire");
   _wire = static_cast<UartWire*>(Factory::get(wire_name));
+
+  // Get the handle
+  int handle = _wire->handle();
+
+  // Add this device to the Poll Multiplexer
+  MuxPoll::add(handle, EPOLLIN);
+
+  // Register to this device
+  PollDispatcher::registerListener(handle, static_cast<PollListener*>(this));
 }
 
 // Change Baud rate
@@ -66,122 +79,45 @@ void UartSensor::write(const UartPacket& pkt)
 }
 
 
-//================================== SerialSensor ==============================
-SerialSensor::SerialSensor(const LuaTable& cfg) : UartSensor(cfg)
+//================================== DigitalSensor =============================
+//Constructor
+DigitalSensor::DigitalSensor(const LuaTable& cfg) : Sensor(cfg)
 {
-  // Reset the serial communication variables
-  reset();
-}
+  // Set device path
+  _device = cfg.get<std::string>("device");
 
-// Reset the uart variables
-void SerialSensor::reset()
-{
-  // Reset the two packets buffer
-  for (int i = 0; i < UART_PACKET_SIZE; i++) { _last_packet[i] = 0; _current_packet[i] = 0; }
+  // Get edge
+  std::string edge = cfg.get<std::string>("edge");
 
-  // Reset the pointer of current char
-  _current_char = &_current_packet[0];
-}
-
-// Start a new packet
-void SerialSensor::startPacket()
-{
-  // Reset the buffer
-  for (int i = 0; i < UART_PACKET_SIZE; i++) { _current_packet[i] = 0; }
-
-  // Point the current character to the begininng of the buffer
-  _current_char = &_current_packet[0];
-}
-
-// End of packet jobs
-void SerialSensor::endPacket()
-{
-  // Move the current packet the the last packet
-  for (int i = 0; i < UART_PACKET_SIZE; i++)
+  // Check edge value
+  if (edge != "rising" && edge != "falling" && edge != "both")
   {
-    _last_packet[i] = _current_packet[i];
+    FATAL_PF("Edge is undefined: %s", edge.c_str());
   }
 
-  // Call the sensor as new packet is ready
-  onPacket(UartPacket(_last_packet));
-}
-
-// Read the device buffer
-void SerialSensor::read()
-{
-  // Allocate a read buffer
-  byte data[UART_BUFFER_SIZE];
-
-  // Initailize the number of byte read
-  int byte_read = 0;
-
-  // Read the buffer from the device
-  daq().uartRead(*this, &data[0], byte_read);
-
-  // Go through the read data
-  for (int i = 0; i < byte_read; i++)
-  {
-    // Found begining of new packet
-    if ((char) data[i] == _begin_char)
-    {
-      startPacket();
-    }
-    // Found end of packet
-    else if ((char) data[i] == _end_char)
-    {
-      // End the current packet
-      endPacket();
-
-      // Start a new packet
-      startPacket();
-
-      // No need to continue with this end of packet character
-      continue;
-    }
-
-    // Check that the buffer is not full
-    if (std::greater<char*>()(_current_char,
-          &_current_packet[0] + sizeof(char*) * (UART_PACKET_SIZE - 1)))
-    {
-      ERROR_LG("Serial sensor over the limit of the packet size buffer");
-    }
-    else
-    {
-      // append the read character to the end of the current packet buffer
-      *_current_char = (char) data[i];
-
-      // Increment the current character pointer
-      _current_char++;
-    }
-  }
-}
-
-
-//================================== SignalSensor ==============================
-//Constructor
-SignalSensor::SignalSensor(const LuaTable& cfg) : UartSensor(cfg)
-{
   // Get the handle
-  int handle = wire()->handle();
+  int handle = daq().openFile(_device);
 
-  // Add this device to the Signal Multiplexer
-  MuxSignal::add(handle);
-
-  // Register to this device
-  SignalDispatcher::registerListener(handle, static_cast<SignalListener*>(this));
-}
-
-
-//=================================== PollSensor ===============================
-//Constructor
-PollSensor::PollSensor(const LuaTable& cfg) : UartSensor(cfg)
-{
-  // Get the handle
-  int handle = wire()->handle();
-
-  // Add this device to the Signal Multiplexer
-  MuxPoll::add(handle);
+  // Add this device to the Poll Multiplexer
+  MuxPoll::add(handle, EPOLLET);
 
   // Register to this device
   PollDispatcher::registerListener(handle, static_cast<PollListener*>(this));
+}
+
+//===================================== Counter ================================
+// Constructor
+Counter::Counter(const LuaTable& cfg) : DigitalSensor(cfg)
+{
+  // Initialize counter
+  _count = 0;
+}
+
+// On event callback
+void Counter::onEvent(const PollEvent& evt)
+{
+  _count++;
+}
+
+
 }

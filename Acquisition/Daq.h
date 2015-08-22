@@ -6,6 +6,8 @@
 #include "Framework/LuaBind.h"
 
 
+namespace pno
+{
 //=========================== Forward Declarations =============================
 
 class I2cWire;
@@ -20,13 +22,11 @@ class DaqDevice : public Accessible
 {
 public :  //======================== Public ======================
 
-          //======================== Device ======================
-  virtual void deviceOpen() = 0;
-  virtual void deviceClose() = 0;
-  virtual void deviceInfo() = 0;
+          //======================== IO ==========================
+  virtual int openFile(const std::string& file) = 0;
 
           //======================== PWM =========================
-  virtual void pwmInit(const std::string pin, const pwmConfig& pwm) = 0;
+  virtual void pwmInit(const std::string& pin, const pwmConfig& pwm) = 0;
   virtual void pwmSetStatus(const std::string& pin, const bool status) = 0;
   virtual bool pwmGetStatus(const std::string& pin) = 0;
 
@@ -46,4 +46,5 @@ public :  //======================== Public ======================
 };
 
 
+}
 #endif

@@ -11,6 +11,9 @@
 #include "Framework/StopWatch.h"
 #include "Framework/MuxSignal.h"
 
+
+namespace pno
+{
 //================================= MuxSignal ==================================
 
 // Configure the given handle device in asynchronous mode
@@ -62,4 +65,7 @@ void MuxSignal::onEvent(int signo, siginfo_t* info, void*)
 
   // Dispatch this event to the listeners
   SignalDispatcher::dispatch(info->si_fd, SignalEvent(info->si_signo, info->si_code, info->si_band));
+}
+
+
 }

@@ -1,41 +1,26 @@
 #include "Framework/Logger.h"
+#include "Tools/IO.h"
 #include "Tools/PWM.h"
 #include "Tools/I2C.h"
-#include "Tools/Uart.h"
+#include "Tools/UART.h"
 #include "Acquisition/LinuxBoardDaq.h"
 #include "Acquisition/Wire.h"
 #include "Sensor/Sensor.h"
 
+
+namespace pno
+{
 //=============================== LinuxBoardDaq ================================
-// Constructor
-LinuxBoardDaq::LinuxBoardDaq(const LuaTable&)
+//====================================== IO ====================================
+// Open file
+int LinuxBoardDaq::openFile(const std::string& file)
 {
-};
-
-// Destructor
-LinuxBoardDaq::~LinuxBoardDaq()
-{
-};
-
-// Open device
-void LinuxBoardDaq::deviceOpen()
-{
-}
-
-// Close device
-void LinuxBoardDaq::deviceClose()
-{
-}
-
-// Print some informations about this device
-void LinuxBoardDaq::deviceInfo()
-{
+  return IoLinux::openFile(file);
 }
 
 //====================================== PWM ===================================
-
 // Initialize PWM pin
-void LinuxBoardDaq::pwmInit(const std::string pin, const pwmConfig& pwm)
+void LinuxBoardDaq::pwmInit(const std::string& pin, const pwmConfig& pwm)
 {
   PwmLinux::pwmInit(pin, pwm);
 }
@@ -110,4 +95,6 @@ void LinuxBoardDaq::uartRead(const UartSensor& sensor, byte* data, int& bytes_nu
 void LinuxBoardDaq::uartWrite(const UartSensor& sensor, const UartPacket& packet)
 {
   UartLinux::uartWrite(sensor.wire()->handle(), packet);
+}
+
 }

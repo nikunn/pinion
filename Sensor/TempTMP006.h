@@ -19,6 +19,9 @@
 #define TMP006_A1 0.00175
 #define TMP006_S0 6.4
 
+
+namespace pno
+{
 // Registers
 enum TMP006_REGISTER
 {
@@ -67,4 +70,6 @@ private:
   float _ambiant;
 };
 
+
+}
 #endif

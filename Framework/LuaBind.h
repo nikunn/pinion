@@ -4,6 +4,8 @@
 #include "sol.hpp"
 
 
+namespace pno
+{
 //================================= Typedefs ===================================
 using LuaState = sol::state;
 using LuaTable = sol::table;
@@ -26,5 +28,5 @@ private :
 };
 
 
-
+}
 #endif

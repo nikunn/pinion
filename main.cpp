@@ -11,14 +11,13 @@
 #include "Framework/MuxPoll.h"
 
 // Include the data acquisition device file
-#if defined __DEVICE_LAB__
-#include "Acquisition/LabJackDaq.cpp"
-#elif defined __DEVICE_UXB__
 #include "Acquisition/LinuxBoardDaq.cpp"
-#endif
 
 #include "Sensor/All.h"
 #include "Actuator/Actuator.h"
+
+// Use 'pno' namespace
+using namespace pno;
 
 //=================================== Main =====================================
 int main()
@@ -27,11 +26,9 @@ int main()
   MuxPoll::initialize();
 
   // Register all the classes in the factory
-  #if defined __DEVICE_LAB__
-  Factory::registerClass("LabJack", new CreatorType<LabJackDaq>);
-  #elif defined __DEVICE_UXB__
+  // Acquisition
   Factory::registerClass("LinuxBoard", new CreatorType<LinuxBoardDaq>);
-  #endif
+
   // Wire
   Factory::registerClass("UartWire", new CreatorType<UartWire>);
   Factory::registerClass("I2cWire", new CreatorType<I2cWire>);
@@ -44,6 +41,7 @@ int main()
   Factory::registerClass("LSM303", new CreatorType<AccelLSM303>);
   Factory::registerClass("MAG303", new CreatorType<MagnetoMAG303>);
   Factory::registerClass("L3GD20", new CreatorType<GyroL3GD20>);
+  Factory::registerClass("Counter", new CreatorType<Counter>);
 
   // Read the configuration file
   LuaScript script("config.lua");
@@ -60,14 +58,21 @@ int main()
   // Create the universe
   Universe::createUniverse(lua_state);
 
-  #if defined __DEVICE_LAB__
-  LabJackDaq* daq = static_cast<LabJackDaq*>(Factory::get("LAB"));
-  #elif defined __DEVICE_RPI__
+  // Get the data acquisition device
   LinuxBoardDaq* daq = static_cast<LinuxBoardDaq*>(Factory::get("UXB"));
-  #endif
 
   Pulser* pwm = static_cast<Pulser*>(Factory::get("Pulser"));
+  Counter* cnt = static_cast<Counter*>(Factory::get("Counter"));
+
+  std::thread poll_thread(MuxPoll::start);
+  poll_thread.detach();
+
+  sleep(1);
+  pwm->start();
+  sleep(1);
   pwm->stop();
+
+  INFO_PF("Total count: %u", cnt->get());
 
   /*
   GpsFGP* gps = static_cast<GpsFGP*>(Factory::get("GPS"));

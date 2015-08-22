@@ -3,6 +3,9 @@
 #include "Acquisition/Daq.h"
 #include "Acquisition/Wire.h"
 
+
+namespace pno
+{
 //=================================== Wire =====================================
 Wire::Wire(const LuaTable& cfg)
 {
@@ -92,3 +95,5 @@ UartWire::~UartWire()
   daq().uartClose(*this);
 }
 
+
+}

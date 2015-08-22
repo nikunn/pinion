@@ -2,6 +2,9 @@
 #include "Tools/PWM.h"
 #include "Tools/IO.h"
 
+
+namespace pno
+{
 // Initialize PWM pin
 void PwmLinux::pwmInit(const std::string pin, const pwmConfig& pwm)
 {
@@ -47,4 +50,7 @@ bool PwmLinux::pwmGetStatus(const std::string& pin)
 
   // Return result
   return (running == "1");
+}
+
+
 }

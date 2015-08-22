@@ -12,6 +12,9 @@
 // Gauss to microTesla factor
 #define GAUSS_TO_MICROTESLA       (100)
 
+
+namespace pno
+{
 // Registers
 enum MAG303_REGISTER
 {
@@ -63,4 +66,6 @@ private:
   SensorVector _data;
 };
 
+
+}
 #endif

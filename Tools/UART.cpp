@@ -9,9 +9,11 @@
 
 #include "Framework/Logger.h"
 #include "Framework/StopWatch.h"
-#include "Tools/Uart.h"
+#include "Tools/UART.h"
 
 
+namespace pno
+{
 //================================= UartLinux ==================================
 int UartLinux::uartOpen(const std::string& device_name, const long baud)
 {
@@ -187,4 +189,7 @@ speed_t UartLinux::longToBaud(const long baud)
     default:
       FATAL_PF("The UART baud rate %u is not compatible", baud);
   }
+}
+
+
 }

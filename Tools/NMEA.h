@@ -4,6 +4,9 @@
 #include <nmea/nmea.h>
 #include <string>
 
+
+namespace pno
+{
 //================================== GpsInfo ===================================
 class GpsInfo
 {
@@ -47,4 +50,5 @@ private:
 };
 
 
+}
 #endif

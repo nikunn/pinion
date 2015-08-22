@@ -1,5 +1,8 @@
 #include "Framework/LuaBind.h"
 
+
+namespace pno
+{
 //================================= LuaScript ==================================
 
 // Constructor
@@ -10,4 +13,7 @@ LuaScript::LuaScript(const std::string& filename)
 
   // Load the file
   _script.open_file(filename);
+}
+
+
 }

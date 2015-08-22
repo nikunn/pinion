@@ -6,6 +6,9 @@
 
 #include "Framework/Dispatcher.h"
 
+
+namespace pno
+{
 //======================= Poll Dispatch Listener Event =========================
 class PollEvent : Event
 {
@@ -34,7 +37,7 @@ public:
   static void stop();
 
   // Add a watcher for some handle
-  static void add(const int handle);
+  static void add(const int handle, const uint32_t event_mask);
 
 private:
 
@@ -55,4 +58,5 @@ private:
 };
 
 
+}
 #endif

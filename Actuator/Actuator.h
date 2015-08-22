@@ -4,6 +4,9 @@
 #include "Framework/Types.h"
 #include "Framework/Factory.h"
 
+
+namespace pno
+{
 //=========================== Forward Declarations =============================
 
 class DaqDevice;
@@ -46,5 +49,5 @@ private : //======================= Private ======================
 };
 
 
-
+}
 #endif

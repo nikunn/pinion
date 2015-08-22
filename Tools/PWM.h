@@ -8,6 +8,9 @@
 #define PWM_POLARITY "polarity"
 #define PWM_RUN "run"
 
+namespace pno
+{
+//================================== PwmLinux ==================================
 class PwmLinux
 {
 public :  //======================== Public ======================
@@ -17,5 +20,5 @@ public :  //======================== Public ======================
 };
 
 
-
+}
 #endif

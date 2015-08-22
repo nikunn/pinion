@@ -1,9 +1,31 @@
-#include<iostream>
-#include<fstream>
-#include<sstream>
+#include <fcntl.h>
+#include <unistd.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include "Framework/Logger.h"
 #include "Tools/IO.h"
+
+
+namespace pno
+{
+//================================== IoLinux ===================================
+// Open a file
+int IoLinux::openFile(const std::string& file)
+{
+  // Open connection to device
+  int handle = open(file.c_str(), O_RDONLY);
+
+  // Check
+  if (handle < 0)
+  {
+    FATAL_PF("Could not open file %s", file.c_str());
+  }
+
+  // Return handle
+  return handle;
+}
 
 // Write to file
 int IoLinux::write(const std::string& file, const std::string& str)
@@ -63,4 +85,7 @@ std::string IoLinux::read(const std::string& file)
 
   // Return result
   return input;
+}
+
+
 }

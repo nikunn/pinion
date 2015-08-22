@@ -3,6 +3,9 @@
 #include "Framework/Logger.h"
 #include "Sensor/TempTMP006.h"
 
+
+namespace pno
+{
 //================================== TempTMP006 ================================
 TempTMP006::TempTMP006(const LuaTable& cfg) : I2cSensor(cfg)
 {
@@ -117,4 +120,7 @@ int16_t TempTMP006::readRawVoltage(void)
   int16_t raw =int8To16(&traw[0]);
 
   return raw; 
+}
+
+
 }

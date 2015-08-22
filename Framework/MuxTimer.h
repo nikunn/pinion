@@ -8,6 +8,9 @@
 #include "Framework/LuaBind.h"
 #include "Framework/Dispatcher.h"
 
+
+namespace pno
+{
 //======================= Timer Dispatch Listener Event ========================
 // Timer Event class.
 class TimerEvent : Event
@@ -136,4 +139,5 @@ private:
 };
 
 
+}
 #endif

@@ -2,6 +2,9 @@
 #include "Framework/Factory.h"
 #include "Framework/Universe.h"
 
+
+namespace pno
+{
 //================================= Universe ===================================
 
 // Create all object in universe
@@ -42,4 +45,7 @@ void Universe::createUniverse(const LuaState& lua_state)
       }
     }
   }
+}
+
+
 }

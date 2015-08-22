@@ -17,6 +17,9 @@
 #define L3GD20_SENSITIVITY_500DPS  0.0175F
 #define L3GD20_SENSITIVITY_2000DPS 0.070F
 
+
+namespace pno
+{
 // Registers
 enum L3GD20_REGISTER
 {
@@ -73,4 +76,6 @@ private:
   L3GD20_RANGE _range;
 };
 
+
+}
 #endif

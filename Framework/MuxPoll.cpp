@@ -9,6 +9,9 @@
 #include "Framework/StopWatch.h"
 #include "Framework/MuxPoll.h"
 
+
+namespace pno
+{
 //================================== MuxPoll ===================================
 
 // Return the epoll instance handle
@@ -71,7 +74,7 @@ void MuxPoll::stop()
 }
 
 // Add the given file descriptor to list of interest
-void MuxPoll::add(const int fd)
+void MuxPoll::add(const int fd, const uint32_t event_mask)
 {
   // Initialize the epoll event structure
   struct epoll_event ev;
@@ -80,7 +83,7 @@ void MuxPoll::add(const int fd)
   ev.data.fd = fd;
 
   // Specify the set of events we are interested in
-  ev.events = EPOLLIN;
+  ev.events = event_mask;
 
   // add this handle to the list of interest
   if (epoll_ctl(getHandle(), EPOLL_CTL_ADD, fd, &ev) == -1)
@@ -118,10 +121,13 @@ void MuxPoll::_listen()
   for (int i = 0; i < ready_nb; i++)
   {
     // Check if we have some input data
-    if (ev_list[i].events & EPOLLIN)
+    if (ev_list[i].events & (EPOLLIN | EPOLLERR))
     {
       // Dispatch this event to the listeners
       PollDispatcher::dispatch(ev_list[i].data.fd, PollEvent());
     }
   }
+}
+
+
 }

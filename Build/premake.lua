@@ -5,18 +5,15 @@ newoption {
   description = "Choose a device for data acquisition",
   allowed =
   {
-    { "lab",  "LabJack" },
     { "uxb",  "LinuxBoard" },
   }
 }
 
 -- Define device compilation flag for all devices
 local device_def = {}
-device_def["lab"] = "__DEVICE_LAB__"
 device_def["uxb"] = "__DEVICE_UXB__"
 
 local device_lib = {}
-device_lib["lab"] = "LabJackM"
 device_lib["uxb"] = nil
 
 -- Set default device to LabJack
@@ -60,7 +57,7 @@ project "external"
 -- Compile some external library
 project "nmea"
   kind "SharedLib"
-  files { "Src/Tools/Nmea.cpp", "Src/Include/Nmea/src/*.c" }
+  files { "Src/Tools/NMEA.cpp", "Src/Include/Nmea/src/*.c" }
   includedirs { "Src/", "Src/Include/Nmea/include/" }
   buildoptions "-w"
   targetdir "lib/"
@@ -96,7 +93,7 @@ project "sensor"
 ---------------------------------- Acquisition ---------------------------------
 project "daq"
   kind "ConsoleApp"
-  files { "Src/Tools/I2C.cpp", "Src/Tools/Uart.cpp", "Src/Tools/PWM.cpp", "Src/Tools/IO.cpp",
+  files { "Src/Tools/I2C.cpp", "Src/Tools/UART.cpp", "Src/Tools/PWM.cpp", "Src/Tools/IO.cpp",
           "Src/Acquisition/Wire.cpp", "Src/main.cpp" }
   links { "external", "nmea", "framework", "actuator", "sensor", "lua5.2", "pthread" }
   if device_lib[device] then links { device_lib[device] } end

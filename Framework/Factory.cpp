@@ -2,6 +2,8 @@
 #include "Framework/Logger.h"
 
 
+namespace pno
+{
 //================================== Factory ===================================
 
 // Register class
@@ -169,4 +171,7 @@ void Factory::deleteObject(const std::string& object_name)
       delete object;
     }
   }
+}
+
+
 }

@@ -3,6 +3,8 @@
 #include "Actuator/Actuator.h"
 
 
+namespace pno
+{
 //=================================== Actuator =================================
 Actuator::Actuator(const LuaTable& cfg)
 {
@@ -26,7 +28,7 @@ Pulser::Pulser(const LuaTable& cfg) : Actuator(cfg)
   // Compute the period in nanosecond
   _config.period = 1.0f / frequency * 1e9 + 0.5f;
 
-  // Set duty cycle
+  // Get duty cycle percentage
   const float duty_pct = cfg.get<float>("duty_cycle");
 
   // Check duty cycle is a percentage
@@ -58,4 +60,7 @@ void Pulser::stop() const
 bool Pulser::status() const
 {
   return daq().pwmGetStatus(_pin);
+}
+
+
 }

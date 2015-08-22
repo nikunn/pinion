@@ -3,6 +3,9 @@
 
 #include "Framework/LuaBind.h"
 
+
+namespace pno
+{
 //================================= Universe ===================================
 
 // Class to manage the universe
@@ -12,4 +15,6 @@ public:
   static void createUniverse(const LuaState&);
 };
 
+
+}
 #endif

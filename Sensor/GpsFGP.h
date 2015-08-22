@@ -3,8 +3,8 @@
 
 #include<vector>
 
-#include "Tools/Nmea.h"
-#include "Tools/Uart.h"
+#include "Tools/NMEA.h"
+#include "Tools/UART.h"
 #include "Sensor/Sensor.h"
 
 // Update rate command
@@ -28,8 +28,11 @@
 // Length of ack packet (for a quick check)
 #define FGP_ACK_LEN 18
 
+
+namespace pno
+{
 //===================================== GpsFGP =================================
-class GpsFGP : public PollSensor
+class GpsFGP : public UartSensor
 {
 public:
 
@@ -50,4 +53,6 @@ private:
   GpsInfo _gps_info;
 };
 
+
+}
 #endif

@@ -14,6 +14,9 @@
 #define I2C_WRITING_BIT 0
 #define I2C_READING_BIT 1
 
+
+namespace pno
+{
 // Opens an I2C device. Example for bus number 1 "/dev/i2c-1"
 int I2cLinux::i2cOpen(const std::string& device_name)
 {
@@ -257,4 +260,7 @@ int I2cLinux::sendSequence(const int handle, const uint16_t* sequence, const int
 
   // Return the result
   return result;
+}
+
+
 }
