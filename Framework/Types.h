@@ -23,13 +23,41 @@ static int16_t int8To16(byte hi, byte lo)
   return ((int16_t)hi << 8) | lo;
 }
 
+
+//=============================== PwmConfig ================================
 // Configuration for PWM
-struct pwmConfig
+struct PwmConfig
 {
   bool polarity;
   unsigned long period;
   unsigned long duty;
 };
+
+
+//============================== GpioConfig ================================
+// Configuration for GPIO
+struct GpioConfig
+{
+  GpioConfig(const std::string& direction, const std::string edge)
+    : direction(direction), edge(edge)
+  {
+    // Check direction value
+    if (direction != "in" && direction != "out")
+    {
+      FATAL_PF("GPIO config, direction is undefined: %s", direction.c_str());
+    }
+
+    // Check edge value
+    if (edge != "rising" && edge != "falling" && edge != "both" && edge != "none")
+    {
+      FATAL_PF("GPIO config, edge is undefined: %s", edge.c_str());
+    }
+  }
+
+  std::string direction;
+  std::string edge;
+};
+
 
 //================================== AXIS ==================================
 // Enum containing the 3 axis
@@ -40,6 +68,7 @@ enum AXIS
   AXIS_Z,
 };
 
+
 //============================== SensorVector ==============================
 // Struct contaning 3 dimensional vector
 struct SensorVector
@@ -48,6 +77,7 @@ struct SensorVector
   float y;
   float z;
 };
+
 
 //=============================== EulerAngle ===============================
 // Struct Containg the three Euler angle

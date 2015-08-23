@@ -6,7 +6,7 @@
 namespace pno
 {
 // Initialize PWM pin
-void PwmLinux::pwmInit(const std::string pin, const pwmConfig& pwm)
+void PwmLinux::pwmInit(const std::string pin, const PwmConfig& pwm)
 {
   // Set the polarity
   if (IoLinux::write(pin + PWM_POLARITY, pwm.polarity) < 0)
@@ -14,16 +14,20 @@ void PwmLinux::pwmInit(const std::string pin, const pwmConfig& pwm)
     FATAL_PF("Cannot set the polarity %u for PWM %s", pwm.polarity, pin.c_str());
   }
 
-  // Set the period
-  if (IoLinux::write(pin + PWM_PERIOD, pwm.period) < 0)
+  // Order of setting period/duty could be inverted so we do it twice..
+  for (int dbl = 0; dbl <2; dbl++)
   {
-    FATAL_PF("Cannot set the period %u for PWM %s", pwm.period, pin.c_str());
-  }
+    // Set the period
+    if (IoLinux::write(pin + PWM_PERIOD, pwm.period) < 0)
+    {
+      FATAL_PF("Cannot set the period %u for PWM %s", pwm.period, pin.c_str());
+    }
 
-  // Set the duty cycle
-  if (IoLinux::write(pin + PWM_DUTY, pwm.duty) < 0)
-  {
-    FATAL_PF("Cannot set the duty cycle %u for PWM %s", pwm.duty, pin.c_str());
+    // Set the duty cycle
+    if (IoLinux::write(pin + PWM_DUTY, pwm.duty) < 0)
+    {
+      FATAL_PF("Cannot set the duty cycle %u for PWM %s", pwm.duty, pin.c_str());
+    }
   }
 
   // A bit of log

@@ -2,8 +2,8 @@
 #include <sys/epoll.h>
 
 #include "Framework/Logger.h"
-#include "Acquisition/Daq.h"
 #include "Acquisition/Wire.h"
+#include "Acquisition/Daq.h"
 #include "Sensor/Sensor.h"
 
 
@@ -81,37 +81,18 @@ void UartSensor::write(const UartPacket& pkt)
 
 //================================== DigitalSensor =============================
 //Constructor
-DigitalSensor::DigitalSensor(const LuaTable& cfg) : Sensor(cfg)
+DigitalSensor::DigitalSensor(const LuaTable& cfg) : Sensor(cfg), Gpio(cfg)
 {
-  // Set device path
-  _device = cfg.get<std::string>("device");
-
-  // Get edge
-  std::string edge = cfg.get<std::string>("edge");
-
-  // Check edge value
-  if (edge != "rising" && edge != "falling" && edge != "both")
-  {
-    FATAL_PF("Edge is undefined: %s", edge.c_str());
-  }
-
-  // Get the handle
-  int handle = daq().openFile(_device);
-
   // Add this device to the Poll Multiplexer
-  MuxPoll::add(handle, EPOLLET);
+  MuxPoll::add(handle(), EPOLLET);
 
   // Register to this device
-  PollDispatcher::registerListener(handle, static_cast<PollListener*>(this));
+  PollDispatcher::registerListener(handle(), static_cast<PollListener*>(this));
 }
 
 //===================================== Counter ================================
 // Constructor
-Counter::Counter(const LuaTable& cfg) : DigitalSensor(cfg)
-{
-  // Initialize counter
-  _count = 0;
-}
+Counter::Counter(const LuaTable& cfg) : DigitalSensor(cfg), _count(0) {}
 
 // On event callback
 void Counter::onEvent(const PollEvent& evt)

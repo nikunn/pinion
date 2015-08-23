@@ -26,8 +26,11 @@ public :  //======================== Public ======================
           //======================== IO ==========================
   int openFile(const std::string& file);
 
+          //======================= GPIO =========================
+  int gpioInit(const std::string& pin, const GpioConfig& gpio);
+
           //======================== PWM =========================
-  void pwmInit(const std::string& pin, const pwmConfig& pwm);
+  void pwmInit(const std::string& pin, const PwmConfig& pwm);
   void pwmSetStatus(const std::string& pin, const bool status);
   bool pwmGetStatus(const std::string& pin);
 

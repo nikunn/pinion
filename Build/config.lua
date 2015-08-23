@@ -97,7 +97,7 @@ Catalog =
     daq = daq_device,
     pin = "/sys/devices/ocp.3/pwm_test_P9_14.12", -- path to device
     polarity = true, -- true is High
-    frequency = 10, -- in Hz
+    frequency = 1000, -- in Hz
     duty_cycle = 0.5, -- in Percent
   },
 
@@ -107,8 +107,9 @@ Catalog =
     name = "Counter",
     class = "Counter",
     daq = daq_device,
-    device = "/sys/class/gpio/gpio115/value",
-    edge = "both",
+    pin = "/sys/class/gpio/gpio115",
+    direction = "in",
+    edge = "rising",
   },
 
   GPS =

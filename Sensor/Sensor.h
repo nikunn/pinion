@@ -7,7 +7,7 @@
 #include "Framework/MuxPoll.h"
 #include "Framework/MuxTimer.h"
 #include "Framework/MuxSignal.h"
-#include "Tools/UART.h"
+#include "Acquisition/Pin.h"
 
 
 namespace pno
@@ -86,18 +86,13 @@ private : //======================= Private ======================
 
 
 //================================== DigitalSensor =============================
-class DigitalSensor : public Sensor, public PollListener
+class DigitalSensor : public Sensor, public PollListener, public Gpio
 {
 public :  //======================== Public ======================
 
   DigitalSensor(const LuaTable&);
 
   void onEvent(const PollEvent&) {};
-
-private : //======================= Private ======================
-
-  std::string _device;
-  int _handle;
 };
 
 

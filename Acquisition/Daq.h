@@ -25,8 +25,11 @@ public :  //======================== Public ======================
           //======================== IO ==========================
   virtual int openFile(const std::string& file) = 0;
 
+          //======================= GPIO =========================
+  virtual int gpioInit(const std::string& pin, const GpioConfig& gpio) = 0;
+
           //======================== PWM =========================
-  virtual void pwmInit(const std::string& pin, const pwmConfig& pwm) = 0;
+  virtual void pwmInit(const std::string& pin, const PwmConfig& pwm) = 0;
   virtual void pwmSetStatus(const std::string& pin, const bool status) = 0;
   virtual bool pwmGetStatus(const std::string& pin) = 0;
 

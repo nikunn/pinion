@@ -93,8 +93,15 @@ project "sensor"
 ---------------------------------- Acquisition ---------------------------------
 project "daq"
   kind "ConsoleApp"
-  files { "Src/Tools/I2C.cpp", "Src/Tools/UART.cpp", "Src/Tools/PWM.cpp", "Src/Tools/IO.cpp",
-          "Src/Acquisition/Wire.cpp", "Src/main.cpp" }
+  files { "Src/Tools/IO.cpp"
+        , "Src/Tools/PWM.cpp"
+        , "Src/Tools/I2C.cpp"
+        , "Src/Tools/UART.cpp"
+        , "Src/Tools/GPIO.cpp"
+        , "Src/Acquisition/Wire.cpp"
+        , "Src/Acquisition/Pin.cpp"
+        , "Src/main.cpp"
+        }
   links { "external", "nmea", "framework", "actuator", "sensor", "lua5.2", "pthread" }
   if device_lib[device] then links { device_lib[device] } end
   includedirs { "Src/", "/usr/include/lua5.2/", "Src/Include/Sol/", "Src/Include/Nmea/include/" }

@@ -45,7 +45,7 @@ private : //======================= Private ======================
   std::string _pin;
 
   // PWM configuration
-  pwmConfig _config;
+  PwmConfig _config;
 };
 
 
