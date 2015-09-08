@@ -60,9 +60,6 @@ private:
 
   // Last read accelerometer data
   SensorVector _data;
-
-  // Axis of gravity
-  AXIS _axis;
 };
 
 

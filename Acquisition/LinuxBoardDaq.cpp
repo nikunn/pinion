@@ -14,9 +14,15 @@ namespace pno
 //=============================== LinuxBoardDaq ================================
 //====================================== IO ====================================
 // Open file
-int LinuxBoardDaq::openFile(const std::string& file)
+int LinuxBoardDaq::openFile(const std::string& file, const int option)
 {
-  return IoLinux::openFile(file);
+  return IoLinux::openFile(file, option);
+}
+
+// Close handle
+void LinuxBoardDaq::closeFile(const int handle)
+{
+  return IoLinux::closeFile(handle);
 }
 
 //===================================== GPIO ===================================
@@ -45,47 +51,44 @@ bool LinuxBoardDaq::pwmGetStatus(const std::string& pin)
   return PwmLinux::pwmGetStatus(pin);
 }
 
-//=============================== I2C Communication ============================
-// Open I2C device
-int LinuxBoardDaq::i2cOpen(const I2cWire& wire)
+//=============================== SPI Communication ============================
+// Initialize SPI device
+void LinuxBoardDaq::spiInit(SpiWire& wire)
 {
-  return I2cLinux::i2cOpen(wire.device());
+  SpiLinux::spiInit(wire);
 }
 
-// Close I2C device
-void LinuxBoardDaq::i2cClose(const I2cWire& wire)
+// Transfer data in SPI
+void LinuxBoardDaq::spiTransfer(const SpiWire& wire, const byte* wdata, byte* rdata, const int bytes_num)
 {
-  I2cLinux::i2cClose(wire.handle());
+  SpiLinux::spiTransfer(wire, wdata, rdata, bytes_num);
+}
+
+//=============================== I2C Communication ============================
+// Initialize I2C device
+void LinuxBoardDaq::i2cInit(const I2cWire& wire)
+{
+  I2cLinux::i2cInit(wire.handle());
 }
 
 // Read data in I2C
-void LinuxBoardDaq::i2cRead(const I2cSensor& sensor, const byte regis,
-                             byte* data, const int bytes_num)
+void LinuxBoardDaq::i2cRead(const I2cSensor& sensor, const byte regis, byte* data, const int bytes_num)
 {
-  // Execute the I2C communication
   int result = I2cLinux::i2cRead(sensor.wire()->handle(), sensor.address(), regis, data, bytes_num);
 }
 
 // Write data in I2C
-void LinuxBoardDaq::i2cWrite(const I2cSensor& sensor, const byte regis,
-                              const byte* data, const int bytes_num)
+void LinuxBoardDaq::i2cWrite(const I2cSensor& sensor, const byte regis, const byte* data, const int bytes_num)
 {
-  // Execute the I2C communication
   int result = I2cLinux::i2cWrite(sensor.wire()->handle(), sensor.address(), regis, data, bytes_num);
 }
 
 
 //=============================== UART Communication ===========================
-// Open UART device
-int LinuxBoardDaq::uartOpen(const UartWire& wire)
+// Initialize UART device
+void LinuxBoardDaq::uartInit(const UartWire& wire)
 {
-  return UartLinux::uartOpen(wire.device(), wire.defaultBaud());
-}
-
-// Close UART device
-void LinuxBoardDaq::uartClose(const UartWire& wire)
-{
-  UartLinux::uartClose(wire.handle());
+  UartLinux::uartInit(wire.handle(), wire.defaultBaud());
 }
 
 // Change the baud of UART device

@@ -19,47 +19,40 @@ Universe =
 
     -- I2C wire connecting sensors
     "I2cWire",
+
+    -- SPI wire connecting sensors
+    "SpiWire",
   },
 
   -- List of actuators plugged to data acquisition devices
   {
     -- PWM
-    "Pulser",
+    -- "Pulser",
   },
 
   -- List of sensors plugged to data acquisition devices
   {
     -- Counter
-    "Counter",
-  }
+    -- "Counter",
 
-  --[[
-  {
     -- GPS Sensor
     "GPS",
 
     -- Accelerometer
-    "Accel",
+    "AccelADXL",
 
     -- Gyroscope
-    "Gyro",
+    -- "Gyro",
 
     -- Magnetometer
-    "Magneto",
+    -- "Magneto",
   },
-  --]]
 }
 
 ------------------------------------ Catalog -----------------------------------
 Catalog =
 {
     ------------------------------ Acquisition -----------------------------
-  LAB =
-  {
-    name = "LAB",
-    class = "LabJack",
-  },
-
   UXB =
   {
     name = "UXB",
@@ -75,8 +68,6 @@ Catalog =
     device = "/dev/ttyO1",
     com_type = "asynch", -- serial or asynch
     default_baud = 9600,
-    transmit_line = 1,
-    receive_line = 0,
   },
 
   I2cWire =
@@ -85,8 +76,17 @@ Catalog =
     class = "I2cWire",
     daq = daq_device,
     device = "/dev/i2c-1",
-    data_line = 2,
-    clock_line = 3,
+  },
+
+  SpiWire =
+  {
+    name = "SpiWire",
+    class = "SpiWire",
+    mode = 3,
+    word_bits = 8,
+    speed = 500000,
+    daq = daq_device,
+    device = "/dev/spidev1.0",
   },
 
     ------------------------------- Actuators ------------------------------
@@ -122,13 +122,21 @@ Catalog =
     rate = 10, -- in Hz, (1/5/10)
   },
 
-  Accel =
+  AccelLSM =
   {
-    name = "Accel",
+    name = "AccelLSM",
     class = "LSM303",
     daq = daq_device,
     wire = "I2cWire",
-    gravity_axis = "Z",
+    period_ms = 400, -- in Millisecond
+  },
+
+  AccelADXL =
+  {
+    name = "AccelADXL",
+    class = "ADXL345",
+    daq = daq_device,
+    wire = "SpiWire",
     period_ms = 400, -- in Millisecond
   },
 

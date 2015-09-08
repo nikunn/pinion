@@ -1,6 +1,8 @@
 #ifndef _IO_LINUX_H
 #define _IO_LINUX_H
 
+#include <fcntl.h>
+
 
 namespace pno
 {
@@ -9,7 +11,8 @@ class IoLinux
 {
 public :  //======================== Public ======================
   // Helper to open
-  static int openFile(const std::string& file);
+  static int openFile(const std::string& file, const int option = O_RDONLY);
+  static void closeFile(const int handle);
 
   // Helper to write
   static int write(const std::string& file, const std::string& str);

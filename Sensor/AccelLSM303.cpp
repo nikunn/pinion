@@ -11,25 +11,6 @@ AccelLSM303::AccelLSM303(const LuaTable& cfg) : I2cSensor(cfg)
 {
   // Set the sensor I2C address
   _address = LSM303_I2CADDR;
-
-  // Get the gravity axis as a string from the config
-  std::string axis_str = cfg.get<std::string>("gravity_axis");
-
-  // Get the axis as a char, for switch statement
-  char axis = axis_str.c_str()[0];
-
-  // Set the sensor gravity axis
-  switch(axis)
-  {
-    case 'X':
-      _axis = AXIS_X; break;
-    case 'Y':
-      _axis = AXIS_Y; break;
-    case 'Z':
-      _axis = AXIS_Z; break;
-    default:
-      FATAL_LG("LSM303 Cannot parse the gravity axis (X/Y/Z)");
-  }
 }
 
 // Initialize Accelerometer
@@ -86,9 +67,9 @@ void AccelLSM303::get()
   _data.z = int8To16(zhi, zlo) >> 4;
 
   // Convert the value to g and adjust the axis of gravity
-  _data.x = _data.x / 1000 - (_axis == AXIS_X ? 1 : 0);
-  _data.y = _data.y / 1000 - (_axis == AXIS_Y ? 1 : 0);
-  _data.z = _data.z / 1000 - (_axis == AXIS_Z ? 1 : 0);
+  _data.x = _data.x / 1000;
+  _data.y = _data.y / 1000;
+  _data.z = _data.z / 1000;
 
   // Some log if debug
   INFO_PF("LSM303 x:%f y:%f z:%f", _data.x, _data.y, _data.z);

@@ -1,3 +1,5 @@
+#include <fcntl.h>
+
 #include "Framework/Logger.h"
 #include "Framework/Factory.h"
 #include "Acquisition/Daq.h"
@@ -21,58 +23,59 @@ Wire::Wire(const LuaTable& cfg)
 // Constructor
 I2cWire::I2cWire(const LuaTable& cfg) : Wire(cfg)
 {
-  // Set the data line
-  _data_line = cfg.get<int>("data_line");
-
-  // Set the clock line
-  _clock_line = cfg.get<int>("clock_line");
-
   // Open the connection to this I2C bus
-  _handle = daq().i2cOpen(*this);
+  _handle = daq().openFile(device(), O_RDWR);
+
+  // Initialize the connection
+  daq().i2cInit(*this);
 
   // A bit of log
-  INFO_PF("Created I2C wire \"%s\", data:%u clock:%u device:%s handle:%u",
-    cfg.get<std::string>("name").c_str(), _data_line, _clock_line, device().c_str(), _handle);
+  INFO_PF("Created I2C wire \"%s\", device:%s handle:%u",
+    cfg.get<std::string>("name").c_str(), device().c_str(), _handle);
 }
 
 // Destructor
 I2cWire::~I2cWire()
 {
   // Close connection to I2C bus
-  daq().i2cClose(*this);
+  daq().closeFile(handle());
 }
 
 
 //================================== SPIWire ===================================
 SpiWire::SpiWire(const LuaTable& cfg) : Wire(cfg)
 {
-  // Set the clock line
-  _clock_line = cfg.get<int>("clock_line");
+  // Get speed
+  _speed = cfg.get<uint32_t>("speed");
 
-  // Set the mosi line
-  _mosi_line = cfg.get<int>("mosi_line");
+  // Get mode
+  _mode = cfg.get<uint8_t>("mode");
 
-  // Set the miso line
-  _miso_line = cfg.get<int>("miso_line");
+  // Get number of bits per word
+  _word_bits = cfg.get<uint8_t>("word_bits");
 
-  // Set the slave line
-  _slave_line = cfg.get<int>("slave_line");
+  // Open the connection to this I2C bus
+  _handle = daq().openFile(device(), O_RDWR);
+
+  // Initialize this connection
+  daq().spiInit(*this);
 
   // A bit of log
-  INFO_PF("Created SPI wire \"%s\", clock:%u mosi:%u miso:%u slave:%u",
-    cfg.get<std::string>("name").c_str(), _clock_line, _mosi_line, _miso_line, _slave_line);
+  INFO_PF("Created SPI wire \"%s\", device:%s handle:%u, mode:%u, speed:%u wordBits:%u",
+    cfg.get<std::string>("name").c_str(), device().c_str(), _handle, mode(), speed(), wordBits());
+}
+
+// Destructor
+SpiWire::~SpiWire()
+{
+  // Close connection to SPI bus
+  daq().closeFile(handle());
 }
 
 
 //================================= UartWire ===================================
 UartWire::UartWire(const LuaTable& cfg) : Wire(cfg)
 {
-  // Set the transmit line
-  _transmit_line = cfg.get<int>("transmit_line");
-
-  // Set the Receive line
-  _receive_line = cfg.get<int>("receive_line");
-
   // Get the default baud
   _default_baud = cfg.get<long>("default_baud");
 
@@ -80,19 +83,21 @@ UartWire::UartWire(const LuaTable& cfg) : Wire(cfg)
   std::string com_type_str = cfg.get<std::string>("com_type");
 
   // Open the connection to this serial device
-  _handle = daq().uartOpen(*this);
+  _handle = daq().openFile(device(), O_RDWR | O_NOCTTY | O_NONBLOCK);
+
+  // Initialize the connection
+  daq().uartInit(*this);
 
   // A bit of log
-  INFO_PF("Created UART wire \"%s\", transmit:%u receive:%u device:%s handle:%u",
-    cfg.get<std::string>("name").c_str(), _transmit_line, _receive_line,
-    device().c_str(), _handle);
+  INFO_PF("Created UART wire \"%s\", device:%s handle:%u",
+    cfg.get<std::string>("name").c_str(), device().c_str(), _handle);
 }
 
 // Destructor
 UartWire::~UartWire()
 {
   // Close connection to UART
-  daq().uartClose(*this);
+  daq().closeFile(handle());
 }
 
 

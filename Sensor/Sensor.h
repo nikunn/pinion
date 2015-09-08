@@ -15,6 +15,7 @@ namespace pno
 //=========================== Forward Declarations =============================
 
 class I2cWire;
+class SpiWire;
 class UartWire;
 class DaqDevice;
 
@@ -56,6 +57,28 @@ protected : //===================== Protected ====================
 private : //======================= Private ======================
 
   I2cWire* _wire;
+};
+
+
+//=================================== SpiSensor ================================
+class SpiSensor : public Sensor, public TimerListener
+{
+public :  //======================== Public ======================
+
+  SpiSensor(const LuaTable&);
+
+  const SpiWire* wire() const { return _wire; }
+
+  void read(const byte regis, byte* data, const int bytes_num = 1);
+  void write(const byte regis, byte* data, const int bytes_num = 1);
+  void transfer(const byte* wdata, byte* rdata, const int bytes_num);
+
+  virtual void get() = 0;
+  void onEvent(const TimerEvent&) { get(); }
+
+private : //======================= Private ======================
+
+  SpiWire* _wire;
 };
 
 

@@ -3,7 +3,9 @@
 
 #include "Framework/Accessible.h"
 #include "Framework/LuaBind.h"
+#include "Framework/Types.h"
 #include "Tools/I2C.h"
+#include "Tools/SPI.h"
 #include "Tools/UART.h"
 
 
@@ -40,13 +42,6 @@ class I2cWire : public Wire
 public :
   I2cWire(const LuaTable&);
   ~I2cWire();
-
-  int dataLine() const { return _data_line; }
-  int clockLine() const { return _clock_line; }
-
-private :
-  int _data_line;
-  int _clock_line;
 };
 
 
@@ -55,17 +50,19 @@ class SpiWire : public Wire
 {
 public :
   SpiWire(const LuaTable&);
+  ~SpiWire();
 
-  int clockLine() const { return _clock_line; }
-  int mosiLine() const { return _mosi_line; }
-  int misoLine() const { return _miso_line; }
-  int slaveLine() const { return _slave_line; }
+  uint8_t& mode() { return _mode; }
+  uint32_t& speed() { return _speed; }
+  uint8_t& wordBits() { return _word_bits; }
+
+  const uint32_t& speed() const { return _speed; }
+  const uint8_t& wordBits() const { return _word_bits; }
 
 private :
-  int _clock_line;
-  int _mosi_line;
-  int _miso_line;
-  int _slave_line;
+  uint8_t _mode;
+  uint32_t _speed;
+  uint8_t _word_bits;
 };
 
 
@@ -76,15 +73,9 @@ public :
   UartWire(const LuaTable&);
   ~UartWire();
 
-  int transmitLine() const { return _transmit_line; }
-  int receiveLine() const { return _receive_line; }
-
   long defaultBaud() const { return _default_baud; }
 
 private :
-  int _transmit_line;
-  int _receive_line;
-
   long _default_baud;
 };
 

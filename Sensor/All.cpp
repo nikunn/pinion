@@ -1,5 +1,6 @@
 #include "Sensor/Sensor.cpp"
 #include "Sensor/AccelLSM303.cpp"
+#include "Sensor/AccelADXL345.cpp"
 #include "Sensor/MagnetoMAG303.cpp"
 #include "Sensor/GyroL3GD20.cpp"
 #include "Sensor/GpsFGP.cpp"

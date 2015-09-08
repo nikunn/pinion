@@ -30,8 +30,7 @@ class UartLinux
 {
 public :  //======================== Public ======================
 
-  static int uartOpen(const std::string& device_name, const long baud);
-  static void uartClose(const int handle);
+  static void uartInit(const int handle, const long baud);
 
   static void uartWrite(const int handle, const UartPacket&);
   static UartPacket uartRead(const int handle);

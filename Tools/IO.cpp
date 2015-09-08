@@ -1,4 +1,3 @@
-#include <fcntl.h>
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
@@ -12,10 +11,10 @@ namespace pno
 {
 //================================== IoLinux ===================================
 // Open a file
-int IoLinux::openFile(const std::string& file)
+int IoLinux::openFile(const std::string& file, const int option)
 {
   // Open connection to device
-  int handle = open(file.c_str(), O_RDONLY);
+  int handle = open(file.c_str(), option);
 
   // Check
   if (handle < 0)
@@ -25,6 +24,16 @@ int IoLinux::openFile(const std::string& file)
 
   // Return handle
   return handle;
+}
+
+// Close File
+void IoLinux::closeFile(const int handle)
+{
+  // Open connection to device
+  int err = close(handle);
+
+  // Check
+  if (err < 0) { ERROR_PF("Could not close handle %u", handle); }
 }
 
 // Write to file

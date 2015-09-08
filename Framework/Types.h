@@ -58,6 +58,15 @@ struct GpioConfig
   std::string edge;
 };
 
+//================================ SPI_MODE ================================
+// The SPI Mode
+enum SPI_MODE
+{
+  MODE_LICR = 0,   //!< Low at idle, capture on rising clock edge
+  MODE_LICF = 1,   //!< Low at idle, capture on falling clock edge
+  MODE_HICF = 2,   //!< High at idle, capture on falling clock edge
+  MODE_HICR = 3,   //!< High at idle, capture on rising clock edge
+};
 
 //================================== AXIS ==================================
 // Enum containing the 3 axis

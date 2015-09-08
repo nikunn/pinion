@@ -18,49 +18,27 @@
 namespace pno
 {
 // Opens an I2C device. Example for bus number 1 "/dev/i2c-1"
-int I2cLinux::i2cOpen(const std::string& device_name)
+void I2cLinux::i2cInit(const int handle)
 {
-  // Open connection to device
-  int handle = open(device_name.c_str(), O_RDWR);
-
-  // Check
-  if (handle < 0)
-  {
-    FATAL_PF("Could not open connection to I2C device %s", device_name.c_str());
-  }
-
   // Define variable for check
   unsigned long funcs;
 
   // Perform check of I2C functionality
   if(ioctl(handle, I2C_FUNCS, &funcs) < 0)
   {
-    FATAL_PF("Could not perform I2C check on device %s", device_name.c_str());
+    FATAL_PF("Could not perform I2C check on handle %u", handle);
   }
 
   // Abort if device does not have I2C functionality
   if (!(funcs & I2C_FUNC_I2C))
   {
-    FATAL_PF("I2C device %s does not have I2C functionality", device_name.c_str());
+    FATAL_PF("I2C handle %u does not have I2C functionality", handle);
   }
-  // Return the handle
-  return handle;
-}
-
-// Close an I2C device
-void I2cLinux::i2cClose(const int handle)
-{
-  // Open connection to device
-  int err = close(handle);
-
-  // Check
-  if (err < 0) { ERROR_PF("Could not close connection to I2C on handle %u", handle); }
 }
 
 // Create a sequence to read some bytes and execute the communication
 // Example of such sequence {0x70, 0x8a, I2C_RESTART, 0x71, I2C_READ};
-int I2cLinux::i2cRead(const int handle, const byte address, const byte regis,
-                      byte* data, const int bytes_num)
+int I2cLinux::i2cRead(const int handle, const byte address, const byte regis, byte* data, const int bytes_num)
 {
   // Benchmark I2C read actions.
   BENCH_SCOPE("I2C READ");
@@ -102,8 +80,7 @@ int I2cLinux::i2cRead(const int handle, const byte address, const byte regis,
 
 // Create a sequence to read some bytes and execute the communication
 // For write the sequence is only one segment
-int I2cLinux::i2cWrite(const int handle, const byte address, const byte regis,
-                       const byte* data, const int bytes_num)
+int I2cLinux::i2cWrite(const int handle, const byte address, const byte regis, const byte* data, const int bytes_num)
 {
   // Benchmark I2C write actions.
   BENCH_SCOPE("I2C WRITE");

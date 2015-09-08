@@ -39,6 +39,78 @@ void I2cSensor::write(const byte regis, byte* data, const int bytes_num)
 }
 
 
+//=================================== SpiSensor ================================
+SpiSensor::SpiSensor(const LuaTable& cfg) : Sensor(cfg), TimerListener(cfg)
+{
+  // Set Wire
+  std::string wire_name = cfg.get<std::string>("wire");
+  _wire = static_cast<SpiWire*>(Factory::get(wire_name));
+}
+
+// Read sensor data from acquisition device
+void SpiSensor::read(const byte regis, byte* data, const int bytes_num)
+{
+  // Copy register address
+  byte address = regis;
+
+  // Read mode
+  address |= 0x80;
+
+  // Add the multiple read bit if needed
+  if (bytes_num > 1) { address |= 0x40; }
+
+  // Initialize total length
+  int length = bytes_num + 1;
+
+  // Initialize the read and write data structure
+  byte* wdata = new byte[length]();
+  byte* rdata = new byte[length]();
+
+  // Define the first data
+  wdata[0] = address;
+
+  // Transfer the data
+  transfer(wdata, rdata, length);
+
+  // Copy the read data to the argument array (first byte is skipped)
+  for (int i = 0; i < bytes_num; i++) { data[i] = rdata[i + 1]; }
+
+  // Delete the temporary arrays
+  delete[] wdata;
+  delete[] rdata;
+}
+
+// Write data to sensor
+void SpiSensor::write(const byte regis, byte* data, const int bytes_num)
+{
+  // Initialize total length
+  int length = bytes_num + 1;
+
+  // Initialize the read data
+  byte rdata = 0x00;
+
+  // Initialize the write data structure
+  byte* wdata = new byte[length]();
+
+  // Input the register address as first byte to write
+  wdata[0] = regis;
+
+  // The rest of the sequence is made of the data we want to write
+  for (int i = 0; i < bytes_num; i++) { wdata[1 + i] = data[i]; }
+
+  // Transfer the data
+  transfer(wdata, &rdata, length);
+
+  // Delete the temporary write data
+  delete[] wdata;
+}
+
+// Transfer data to sensor
+void SpiSensor::transfer(const byte* wdata, byte* rdata, const int bytes_num)
+{
+  daq().spiTransfer(*wire(), wdata, rdata, bytes_num);
+}
+
 //=================================== UartSensor ===============================
 UartSensor::UartSensor(const LuaTable& cfg) : Sensor(cfg)
 {

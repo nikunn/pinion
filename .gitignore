@@ -2,6 +2,7 @@
 *.make
 *.d
 .ycm_extra_conf.pyc
+Build/spidev_test
 Build/Src
 Build/Makefile
 Build/compile_commands.json

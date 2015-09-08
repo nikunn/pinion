@@ -15,21 +15,12 @@
 namespace pno
 {
 //================================= UartLinux ==================================
-int UartLinux::uartOpen(const std::string& device_name, const long baud)
+void UartLinux::uartInit(const int handle, const long baud)
 {
-  // Open the UART device
-  int handle = open(device_name.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
-
-  // Check the result
-  if(handle < 0)
-  {
-    FATAL_PF("Could not open connection to UART device %s", device_name.c_str());
-  }
-
   // Check if it really is a UART device
   if(!isatty(handle))
   {
-    FATAL_PF("Device %s is not a UART device", device_name.c_str());
+    FATAL_PF("Device %u is not a UART device", handle);
   }
 
   // Apply the UART configuration for this device
@@ -37,9 +28,6 @@ int UartLinux::uartOpen(const std::string& device_name, const long baud)
 
   // Change the baud rate
   changeBaud(handle, baud);
-
-  // Return the handle
-  return handle;
 }
 
 // Apply a termios configuration to an UART handle
@@ -108,19 +96,6 @@ void UartLinux::changeBaud(const int handle, const long baud)
 
   // Flush the input and output queue
   tcflush(handle, TCIOFLUSH);
-}
-
-// Close a UART device
-void UartLinux::uartClose(const int handle)
-{
-  // A bit of log
-  INFO_PF("Closing UART connection on handle %u", handle );
-
-  // Close the connection to the given handle
-  if (close(handle) < 0)
-  {
-    ERROR_PF("Could not close connection to UART device on handle %u", handle);
-  }
 }
 
 // Write to UART

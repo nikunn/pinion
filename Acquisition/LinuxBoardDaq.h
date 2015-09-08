@@ -24,7 +24,8 @@ public :  //======================== Public ======================
   ~LinuxBoardDaq() {};
 
           //======================== IO ==========================
-  int openFile(const std::string& file);
+  int openFile(const std::string& file, const int option);
+  void closeFile(const int handle);
 
           //======================= GPIO =========================
   int gpioInit(const std::string& pin, const GpioConfig& gpio);
@@ -34,15 +35,17 @@ public :  //======================== Public ======================
   void pwmSetStatus(const std::string& pin, const bool status);
   bool pwmGetStatus(const std::string& pin);
 
+          //================= SPI Communication ==================
+  void spiInit(SpiWire&);
+  void spiTransfer(const SpiWire& wire, const byte* wdata, byte* rdata, const int bytes_num);
+
           //================= I2C Communication ==================
-  int i2cOpen(const I2cWire&);
-  void i2cClose(const I2cWire&);
+  void i2cInit(const I2cWire&);
   void i2cRead(const I2cSensor&, const byte regis, byte* data, const int bytes_num = 1);
   void i2cWrite(const I2cSensor&, const byte regis, const byte* data, const int bytes_num = 1);
 
           //================== Uart Communication ================
-  int uartOpen(const UartWire&);
-  void uartClose(const UartWire&);
+  void uartInit(const UartWire&);
   void changeBaud(const UartSensor&);
   void uartWrite(const UartSensor&, const UartPacket&);
   void uartRead(const UartSensor&, byte* data, int& bytes_num);
