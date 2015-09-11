@@ -78,9 +78,6 @@ int SpiLinux::spiTransfer(const SpiWire& wire, const byte* wdata, byte* rdata, c
     FATAL_PF("Could not transfer SPI data to device handle %u", wire.handle());
   }
 
-  // INFO_PF("w1:%x w2:%x", wdata[0], wdata[1]);
-  // INFO_PF("r1:%x r2:%x", rdata[0], rdata[1]);
-
   // Return 
   return bytes_num;
 }

@@ -84,7 +84,7 @@ Catalog =
     class = "SpiWire",
     mode = 3,
     word_bits = 8,
-    speed = 500000,
+    speed = 1000000,
     daq = daq_device,
     device = "/dev/spidev1.0",
   },

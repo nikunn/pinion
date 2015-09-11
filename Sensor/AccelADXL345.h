@@ -28,6 +28,7 @@ enum ADXL345_REGISTER
   ADXL345_REGISTER_OUT_Z_L_A       = 0x36,
   ADXL345_REGISTER_OUT_Z_H_A       = 0x37,
   ADXL345_REGISTER_DATA_RATE       = 0x2C,
+  ADXL345_REGISTER_POWER_CTL       = 0x2D,
   ADXL345_REGISTER_DATA_RANGE      = 0x31,
 };
 
@@ -74,7 +75,7 @@ public:
 private:
 
   // Set range in g
-  void setRange(ADXL345_DATARANGE range);
+  void setFormat(ADXL345_DATARANGE range);
 
   // Last read accelerometer data
   SensorVector _data;

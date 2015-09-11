@@ -100,7 +100,7 @@ int main()
 
   std::thread poll_thread(MuxPoll::start);
   poll_thread.detach();
-  sleep(10);
+  sleep(20);
 
   return 0;
 }
