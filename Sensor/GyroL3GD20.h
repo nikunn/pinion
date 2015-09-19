@@ -10,7 +10,7 @@
 #define L3GD20_I2CADDR 0x6B
 
 // Sensor Id WHOAMI
-#define L3GD20_ID 0b11010100
+#define L3GD20_ID 0xD7
 
 // Sensitivity
 #define L3GD20_SENSITIVITY_250DPS  0.00875F
@@ -60,20 +60,20 @@ enum L3GD20_RANGE
 };
 
 //=================================== GyroL3GD20 ===============================
-class GyroL3GD20 : public I2cSensor
+class GyroL3GD20 : public SpiSensor
 {
 public:
 
   GyroL3GD20(const LuaTable&);
 
   bool init();
-  float sensitivity(L3GD20_RANGE range);
   void get();
 
 private:
 
   SensorVector _data;
   L3GD20_RANGE _range;
+  float _sensitivity;
 };
 
 

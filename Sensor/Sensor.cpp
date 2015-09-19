@@ -10,7 +10,7 @@
 namespace pno
 {
 //==================================== Sensor ==================================
-Sensor::Sensor(const LuaTable& cfg)
+Sensor::Sensor(const LuaTable& cfg) : Accessible(cfg)
 {
   // Set Data Acquisition device
   std::string daq_name = cfg.get<std::string>("daq");
@@ -153,7 +153,7 @@ void UartSensor::write(const UartPacket& pkt)
 
 //================================== DigitalSensor =============================
 //Constructor
-DigitalSensor::DigitalSensor(const LuaTable& cfg) : Sensor(cfg), Gpio(cfg)
+DigitalSensor::DigitalSensor(const LuaTable& cfg) : Sensor(cfg), GpioFile(cfg)
 {
   // Add this device to the Poll Multiplexer
   MuxPoll::add(handle(), EPOLLET);

@@ -1,7 +1,6 @@
 #include "Framework/Logger.h"
 #include "Tools/IO.h"
 #include "Tools/PWM.h"
-#include "Tools/GPIO.h"
 #include "Tools/I2C.h"
 #include "Tools/UART.h"
 #include "Acquisition/LinuxBoardDaq.h"
@@ -23,13 +22,6 @@ int LinuxBoardDaq::openFile(const std::string& file, const int option)
 void LinuxBoardDaq::closeFile(const int handle)
 {
   return IoLinux::closeFile(handle);
-}
-
-//===================================== GPIO ===================================
-// Initialize GPIO pin
-int LinuxBoardDaq::gpioInit(const std::string& pin, const GpioConfig& gpio)
-{
-  return GpioLinux::gpioInit(pin, gpio);
 }
 
 //====================================== PWM ===================================

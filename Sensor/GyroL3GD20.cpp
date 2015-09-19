@@ -7,11 +7,8 @@ namespace pno
 {
 //=================================== GyroL3GD20 ===============================
 // Instantiates a new GyroL3GD20 class
-GyroL3GD20::GyroL3GD20(const LuaTable& cfg) : I2cSensor(cfg)
+GyroL3GD20::GyroL3GD20(const LuaTable& cfg) : SpiSensor(cfg)
 {
-  // Set the sensor I2C address
-  _address = L3GD20_I2CADDR;
-
   // Get the sensor range
   int range = cfg.get<int>("range");
 
@@ -56,14 +53,17 @@ bool GyroL3GD20::init()
     case L3GD20_RANGE_250DPS:
       config = 0x00;
       write(L3GD20_REGISTER_CTRL_REG4, &config);
+      _sensitivity = L3GD20_SENSITIVITY_250DPS;
       break;
     case L3GD20_RANGE_500DPS:
       config = 0x10;
       write(L3GD20_REGISTER_CTRL_REG4, &config);
+      _sensitivity = L3GD20_SENSITIVITY_500DPS;
       break;
     case L3GD20_RANGE_2000DPS:
       config = 0x20;
       write(L3GD20_REGISTER_CTRL_REG4, &config);
+      _sensitivity = L3GD20_SENSITIVITY_2000DPS;
       break;
   }
 
@@ -78,28 +78,14 @@ bool GyroL3GD20::init()
   return true;
 }
 
-// Return the sensitivity depending on the range
-float GyroL3GD20::sensitivity(L3GD20_RANGE range)
-{
-  switch(range)
-  {
-    case L3GD20_RANGE_250DPS:
-      return L3GD20_SENSITIVITY_250DPS;
-    case L3GD20_RANGE_500DPS:
-      return L3GD20_SENSITIVITY_500DPS;
-    case L3GD20_RANGE_2000DPS:
-      return L3GD20_SENSITIVITY_2000DPS;
-  }
-}
-
 // Get data from the sensor and process it
 void GyroL3GD20::get()
 {
-  // Read the magnetometer
+  // Read the gyroscope data
   byte data[6];
 
-  // The MSb=1 (0x80) enables address auto-increment to allow multiple read/write.
-  read((L3GD20_REGISTER_OUT_X_L | 0x80), &data[0], 6);
+  // Read multiple register
+  read(L3GD20_REGISTER_OUT_X_L, &data[0], 6);
 
   // Get the lo and hi value for x,y and z
   byte xlo = data[0];
@@ -109,13 +95,10 @@ void GyroL3GD20::get()
   byte zlo = data[4];
   byte zhi = data[5];
 
-  // Get the sensitivity
-  float factor = sensitivity(_range);
-  
   // Convert the value
-  _data.x = factor * int8To16(xhi, xlo);
-  _data.y = factor * int8To16(yhi, ylo);
-  _data.z = factor * int8To16(zhi, zlo);
+  _data.x = _sensitivity * int8To16(xhi, xlo);
+  _data.y = _sensitivity * int8To16(yhi, ylo);
+  _data.z = _sensitivity * int8To16(zhi, zlo);
 
   // Some log
   INFO_PF("L3GD20 x:%f y:%f z:%f", _data.x, _data.y, _data.z);

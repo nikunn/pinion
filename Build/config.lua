@@ -13,6 +13,7 @@ Universe =
   },
 
   -- List of wires connecting the sensors
+  --[[
   {
     -- Uart wire connecting GPS
     "UartWire",
@@ -23,11 +24,22 @@ Universe =
     -- SPI wire connecting sensors
     "SpiWire",
   },
+  ]]--
 
   -- List of actuators plugged to data acquisition devices
   {
     -- PWM
     -- "Pulser",
+  },
+
+  -- List of GPIO
+  {
+    -- GPIO bank 1
+    "GpioBank1",
+
+    -- GPIO
+    "Gpio44",
+    "Gpio61",
   },
 
   -- List of sensors plugged to data acquisition devices
@@ -36,13 +48,13 @@ Universe =
     -- "Counter",
 
     -- GPS Sensor
-    "GPS",
+    -- "GPS",
 
     -- Accelerometer
-    "AccelADXL",
+    -- "AccelADXL",
 
     -- Gyroscope
-    -- "Gyro",
+    --"Gyro",
 
     -- Magnetometer
     -- "Magneto",
@@ -84,7 +96,7 @@ Catalog =
     class = "SpiWire",
     mode = 3,
     word_bits = 8,
-    speed = 1000000,
+    speed = 500000,
     daq = daq_device,
     device = "/dev/spidev1.0",
   },
@@ -101,13 +113,71 @@ Catalog =
     duty_cycle = 0.5, -- in Percent
   },
 
+    ------------------------------- GPIO Bank ------------------------------
+  GpioBank0 =
+  {
+    name = "GpioBank0",
+    class = "GpioBank",
+    file = "/dev/mem",
+    address = 0x44E07000,
+  },
+
+  GpioBank1 =
+  {
+    name = "GpioBank1",
+    class = "GpioBank",
+    file = "/dev/mem",
+    address = 0x4804C000,
+  },
+
+  GpioBank2 =
+  {
+    name = "GpioBank2",
+    class = "GpioBank",
+    file = "/dev/mem",
+    address = 0x481AC000,
+  },
+
+  GpioBank3 =
+  {
+    name = "GpioBank3",
+    class = "GpioBank",
+    file = "/dev/mem",
+    address = 0x481AE000,
+  },
+
+    --------------------------------- GPIO ---------------------------------
+  -- GPIO 44 P8_12 gpio1[12] (pull-down)
+  Gpio44 =
+  {
+    name = "Gpio44",
+    class = "GpioMem",
+    pin = "/sys/class/gpio/gpio44/",
+    direction = "out",
+    edge = "none",
+    bank = "GpioBank1",
+    gpio = 12,
+  },
+
+  -- GPIO 61 P8_26 gpio1[29] (pull down)
+  Gpio61 =
+  {
+    name = "Gpio61",
+    class = "GpioMem",
+    pin = "/sys/class/gpio/gpio61/",
+    direction = "out",
+    edge = "none",
+    bank = "GpioBank1",
+    gpio = 29,
+  },
+
     -------------------------------- Sensors -------------------------------
   Counter =
   {
     name = "Counter",
     class = "Counter",
     daq = daq_device,
-    pin = "/sys/class/gpio/gpio115",
+    pin = "/sys/class/gpio/gpio115/",
     direction = "in",
     edge = "rising",
   },
@@ -155,7 +225,7 @@ Catalog =
     name = "Gyro",
     class = "L3GD20",
     daq = daq_device,
-    wire = "I2cWire",
+    wire = "SpiWire",
     range = 250, -- in degree per second, (250/500/2000)
     period_ms = 100, -- in Millisecond
   },

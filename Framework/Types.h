@@ -34,30 +34,6 @@ struct PwmConfig
 };
 
 
-//============================== GpioConfig ================================
-// Configuration for GPIO
-struct GpioConfig
-{
-  GpioConfig(const std::string& direction, const std::string edge)
-    : direction(direction), edge(edge)
-  {
-    // Check direction value
-    if (direction != "in" && direction != "out")
-    {
-      FATAL_PF("GPIO config, direction is undefined: %s", direction.c_str());
-    }
-
-    // Check edge value
-    if (edge != "rising" && edge != "falling" && edge != "both" && edge != "none")
-    {
-      FATAL_PF("GPIO config, edge is undefined: %s", edge.c_str());
-    }
-  }
-
-  std::string direction;
-  std::string edge;
-};
-
 //================================ SPI_MODE ================================
 // The SPI Mode
 enum SPI_MODE

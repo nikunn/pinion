@@ -9,7 +9,7 @@
 namespace pno
 {
 //=================================== Wire =====================================
-Wire::Wire(const LuaTable& cfg)
+Wire::Wire(const LuaTable& cfg) : Accessible(cfg)
 {
   // Set Data Acquisition device
   std::string daq_name = cfg.get<std::string>("daq");

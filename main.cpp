@@ -32,6 +32,10 @@ int main()
   Factory::registerClass("SpiWire", new CreatorType<SpiWire>);
   Factory::registerClass("UartWire", new CreatorType<UartWire>);
 
+  // GPIO
+  Factory::registerClass("GpioBank", new CreatorType<GpioBank>);
+  Factory::registerClass("GpioMem", new CreatorType<GpioMem>);
+
   // Actuator
   Factory::registerClass("Pulser", new CreatorType<Pulser>);
 
@@ -83,15 +87,16 @@ int main()
   */
 
   // ==================== SENSOR  ====================
+  /*
   // GpsFGP* gps = static_cast<GpsFGP*>(Factory::get("GPS"));
   // gps->init();
 
   // AccelLSM303* accel = static_cast<AccelLSM303*>(Factory::get("AccelLSM"));
+  // AccelADXL345* accel = static_cast<AccelADXL345*>(Factory::get("AccelADXL"));
   // MagnetoMAG303* magneto = static_cast<MagnetoMAG303*>(Factory::get("Magneto"));
-  // GyroL3GD20* gyro = static_cast<GyroL3GD20*>(Factory::get("Gyro"));
-  AccelADXL345* accel = static_cast<AccelADXL345*>(Factory::get("AccelADXL"));
+  GyroL3GD20* gyro = static_cast<GyroL3GD20*>(Factory::get("Gyro"));
 
-  if (accel->init())
+  if (gyro->init())
   {
     std::thread timer_thread(MuxTimer::start);
     timer_thread.detach();
@@ -101,6 +106,22 @@ int main()
   std::thread poll_thread(MuxPoll::start);
   poll_thread.detach();
   sleep(20);
+  */
+
+
+  GpioMem* gpio_44 = static_cast<GpioMem*>(Factory::get("Gpio44"));
+  GpioMem* gpio_61 = static_cast<GpioMem*>(Factory::get("Gpio61"));
+
+  int counter = 0;
+  bool status = true;
+
+  while (counter < 100)
+  {
+    status = !status;
+    gpio_44->write(status);
+
+    counter++;
+  }
 
   return 0;
 }

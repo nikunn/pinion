@@ -7,6 +7,7 @@
 #include "Framework/MuxPoll.h"
 #include "Framework/MuxTimer.h"
 #include "Framework/MuxSignal.h"
+#include "Acquisition/Wire.h"
 #include "Acquisition/Pin.h"
 
 
@@ -17,6 +18,7 @@ namespace pno
 class I2cWire;
 class SpiWire;
 class UartWire;
+class UartPacket;
 class DaqDevice;
 
 
@@ -109,7 +111,7 @@ private : //======================= Private ======================
 
 
 //================================== DigitalSensor =============================
-class DigitalSensor : public Sensor, public PollListener, public Gpio
+class DigitalSensor : public Sensor, public PollListener, public GpioFile
 {
 public :  //======================== Public ======================
 

@@ -67,7 +67,11 @@ project "nmea"
 project "framework"
   kind "SharedLib"
   links { "external" }
-  files { "Src/Framework/Factory.cpp", "Src/Framework/Universe.cpp", "Src/Framework/StopWatch.cpp", "Src/Framework/Mux*.cpp" }
+  files { "Src/Framework/Factory.cpp"
+        , "Src/Framework/Universe.cpp"
+        , "Src/Framework/StopWatch.cpp"
+        , "Src/Framework/Mux*.cpp"
+        }
   includedirs { "Src/", "/usr/include/lua5.2/", "Src/Include/Sol/" }
   targetdir "lib/"
 
@@ -85,7 +89,13 @@ project "actuator"
 project "sensor"
   kind "SharedLib"
   links { "external", "nmea" }
-  files { "Src/Sensor/All.cpp" }
+  files { "Src/Sensor/Sensor.cpp"
+        , "Src/Sensor/Accel*.cpp"
+        , "Src/Sensor/Gps*.cpp"
+        , "Src/Sensor/Gyro*.cpp"
+        , "Src/Sensor/Magneto*.cpp"
+        , "Src/Sensor/Temp*.cpp"
+        }
   includedirs { "Src/", "/usr/include/lua5.2/", "Src/Include/Sol/", "Src/Include/Nmea/include/" }
   targetdir "lib/"
 
@@ -98,7 +108,6 @@ project "daq"
         , "Src/Tools/I2C.cpp"
         , "Src/Tools/SPI.cpp"
         , "Src/Tools/UART.cpp"
-        , "Src/Tools/GPIO.cpp"
         , "Src/Acquisition/Wire.cpp"
         , "Src/Acquisition/Pin.cpp"
         , "Src/main.cpp"

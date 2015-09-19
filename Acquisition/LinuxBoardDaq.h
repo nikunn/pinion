@@ -20,15 +20,12 @@ class LinuxBoardDaq : public DaqDevice
 {
 public :  //======================== Public ======================
 
-  LinuxBoardDaq(const LuaTable&) {};
+  LinuxBoardDaq(const LuaTable& cfg) : DaqDevice(cfg) {};
   ~LinuxBoardDaq() {};
 
           //======================== IO ==========================
   int openFile(const std::string& file, const int option);
   void closeFile(const int handle);
-
-          //======================= GPIO =========================
-  int gpioInit(const std::string& pin, const GpioConfig& gpio);
 
           //======================== PWM =========================
   void pwmInit(const std::string& pin, const PwmConfig& pwm);

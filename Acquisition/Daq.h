@@ -23,12 +23,12 @@ class DaqDevice : public Accessible
 {
 public :  //======================== Public ======================
 
+  DaqDevice(const LuaTable& cfg) : Accessible(cfg) {};
+  ~DaqDevice() {};
+
           //======================== IO ==========================
   virtual int openFile(const std::string& file, const int option) = 0;
   virtual void closeFile(const int handle) = 0;
-
-          //======================= GPIO =========================
-  virtual int gpioInit(const std::string& pin, const GpioConfig& gpio) = 0;
 
           //======================== PWM =========================
   virtual void pwmInit(const std::string& pin, const PwmConfig& pwm) = 0;
