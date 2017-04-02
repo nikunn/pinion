@@ -90,11 +90,12 @@ project "sensor"
   kind "SharedLib"
   links { "external", "nmea" }
   files { "Src/Sensor/Sensor.cpp"
-        , "Src/Sensor/Accel*.cpp"
         , "Src/Sensor/Gps*.cpp"
-        , "Src/Sensor/Gyro*.cpp"
-        , "Src/Sensor/Magneto*.cpp"
         , "Src/Sensor/Temp*.cpp"
+        , "Src/Sensor/Gyro*.cpp"
+        , "Src/Sensor/Accel*.cpp"
+        , "Src/Sensor/Magneto*.cpp"
+        , "Src/Sensor/Particle*.cpp"
         }
   includedirs { "Src/", "/usr/include/lua5.2/", "Src/Include/Sol/", "Src/Include/Nmea/include/" }
   targetdir "lib/"

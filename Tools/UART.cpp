@@ -134,7 +134,7 @@ UartPacket UartLinux::uartRead(const int handle)
   buff[bytes_read]=0;
 
   // Return the result
-  return UartPacket(buff, 0);
+  return UartPacket(buff, bytes_read, 0);
 }
 
 // Get the baud rate in termios format from long

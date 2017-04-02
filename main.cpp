@@ -41,6 +41,7 @@ int main()
 
   // Sensor
   Factory::registerClass("GPS", new CreatorType<GpsFGP>);
+  Factory::registerClass("PMS7003", new CreatorType<ParticlePMS7003>);
   Factory::registerClass("LSM303", new CreatorType<AccelLSM303>);
   Factory::registerClass("ADXL345", new CreatorType<AccelADXL345>);
   Factory::registerClass("MAG303", new CreatorType<MagnetoMAG303>);
@@ -70,6 +71,13 @@ int main()
   LinuxBoardDaq* daq = static_cast<LinuxBoardDaq*>(Factory::get("UXB"));
   
   //================================= Main ===================================
+  std::thread poll_thread(MuxPoll::start);
+  poll_thread.detach();
+
+  // ==================== PARTICLE ===================
+  ParticlePMS7003* pcs = static_cast<ParticlePMS7003*>(Factory::get("PMS7003"));
+  sleep(900000);
+
   // ==================== PULSER  ====================
   /*
   Pulser* pwm = static_cast<Pulser*>(Factory::get("Pulser"));
@@ -106,7 +114,6 @@ int main()
   std::thread poll_thread(MuxPoll::start);
   poll_thread.detach();
   sleep(20);
-  */
 
 
   GpioMem* gpio_44 = static_cast<GpioMem*>(Factory::get("Gpio44"));
@@ -122,6 +129,7 @@ int main()
 
     counter++;
   }
+  */
 
   return 0;
 }

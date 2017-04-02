@@ -20,6 +20,11 @@ class UartPacket
 public :
   UartPacket() {};
   UartPacket(const char* msg, long no = 0) : id(no), message(msg) {};
+  UartPacket(const char* msg, int len, long no = 0)
+  {
+    id = no;
+    message = std::string(msg, len);
+  };
 
   long id;
   std::string message;
